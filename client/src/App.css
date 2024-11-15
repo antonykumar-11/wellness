@@ -1,0 +1,82 @@
+/* Light and Dark Mode Styling */
+body {
+  background-color: #f9fafb; /* Light mode background */
+  color: #111827; /* Light mode text color */
+}
+
+.dark-mode body {
+  background-color: #1f2937; /* Dark mode background */
+  color: #e5e7eb; /* Dark mode text color */
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6; /* Light mode background */
+}
+
+.bg-gray-200 {
+  background-color: #e5e7eb; /* Light mode background */
+}
+
+.text-gray-700 {
+  color: #374151; /* Light mode text color */
+}
+
+.dark-mode .bg-gray-100 {
+  background-color: #374151; /* Dark mode background */
+}
+
+.dark-mode .bg-gray-200 {
+  background-color: #4b5563; /* Dark mode background */
+}
+
+.dark-mode .text-gray-700 {
+  color: #e5e7eb; /* Dark mode text color */
+}
+
+/* Print Styles */
+@media print {
+  /* Show only the print-only class */
+  .print-only {
+    display: block !important;
+    visibility: visible;
+  }
+
+  /* Hide all other content during print */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show print-only content */
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* Hide elements with no-print class */
+  .no-print {
+    display: none;
+  }
+}
+
+/* Base Light Mode Styles */
+.bg-gray-100 {
+  background-color: #f3f4f6; /* Light mode background */
+}
+
+.text-gray-700 {
+  color: #374151; /* Light mode text color */
+}
+
+.bg-gray-200 {
+  background-color: #e5e7eb; /* Light mode background */
+}

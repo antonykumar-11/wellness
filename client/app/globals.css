@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --legend-text-color: #000000; /* Default for light mode */
+}
+
+.dark {
+  --legend-text-color: #ffffff; /* White for dark mode */
+}

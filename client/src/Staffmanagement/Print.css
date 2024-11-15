@@ -1,0 +1,18 @@
+/* Print.css */
+@media print {
+  .print-container {
+    /* Ensure full width for printed content */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* Hide any elements you don't want to print */
+  .print-button {
+    display: none;
+  }
+
+  /* Additional styles for print can go here */
+}

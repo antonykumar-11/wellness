@@ -1,0 +1,44 @@
+/* Loader.css */
+
+.loader {
+  width: 2rem; /* 32px */
+  height: 2rem; /* 32px */
+  border-radius: 50%;
+  display: inline-block;
+  background-color: transparent;
+  animation: bounce 1.5s infinite ease-in-out;
+}
+
+/* Bouncing Animation */
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-1rem); /* Bounce height */
+  }
+  60% {
+    transform: translateY(-0.5rem); /* Bounce height */
+  }
+}
+
+/* Define different colors for each spinner */
+.animation-1 {
+  background-color: #ff5733; /* Red-Orange */
+}
+.animation-2 {
+  background-color: #33ff57; /* Green */
+}
+.animation-3 {
+  background-color: #3357ff; /* Blue */
+}
+.animation-4 {
+  background-color: #ff33a6; /* Pink */
+}
+.animation-5 {
+  background-color: #f0f033; /* Yellow */
+}

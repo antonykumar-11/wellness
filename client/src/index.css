@@ -1,0 +1,211 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Quicksand:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Londrina+Outline&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --legend-text-color: #5500ff; /* Default for light mode */
+}
+
+.dark {
+  --legend-text-color: #54f000; /* White for dark mode */
+}
+
+/* Global transition for color changes */
+* {
+  @apply transition-colors duration-200;
+}
+
+/* Dark mode body styles */
+body {
+  @apply dark:bg-darkBodyColor dark:text-gray-200;
+}
+
+/* Component-specific dark mode styles */
+.header,
+.sidebar {
+  @apply bg-white border-gray-200 dark:bg-darkSectionColor dark:border-gray-700;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white dark:bg-gray-700 shadow-md rounded-lg p-4;
+}
+
+.card-title {
+  @apply text-xl font-bold dark:text-gray-200;
+}
+
+.card-content {
+  @apply text-gray-600 dark:text-gray-300;
+}
+
+/* Button styles */
+.button {
+  @apply px-4 py-2 font-semibold rounded-lg transition-colors;
+}
+
+.button-primary {
+  @apply bg-primaryColor text-white hover:bg-primaryColorLight dark:bg-primaryColorLight dark:text-gray-900 dark:hover:bg-primaryColor;
+}
+
+.button-secondary {
+  @apply bg-secondaryColor text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 767px) {
+  .sidebar {
+    @apply fixed top-0 left-0 z-50 w-64;
+  }
+
+  .header {
+    @apply flex justify-between;
+  }
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+/* Base table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid black;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+td {
+  background-color: #ffffff;
+}
+
+/* Dark mode for table */
+body.dark-mode th {
+  background-color: #374151;
+}
+
+body.dark-mode td {
+  background-color: #1f2937;
+}
+@media print {
+  /* Visibility Handling */
+  body * {
+    visibility: hidden;
+  }
+  .printable-area,
+  .printable-area * {
+    visibility: visible;
+  }
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+  }
+
+  /* Page Margins */
+  @page {
+    margin: 0.5cm;
+    size: A4;
+  }
+
+  /* Page Breaks */
+  .section {
+    page-break-after: always;
+  }
+  table {
+    page-break-inside: avoid;
+  }
+
+  /* Hiding Unwanted Elements */
+  .print-button,
+  .no-print,
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+
+  /* Print Color Adjustment */
+  body {
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Table Styles for Print */
+  th,
+  td {
+    border: 1px solid black;
+    padding: 4px;
+  }
+
+  table {
+    width: 100%;
+    page-break-inside: avoid;
+  }
+}
+
+/* Light and dark mode backgrounds and text */
+body {
+  @apply bg-gray-50 text-gray-800;
+}
+
+.dark-mode body {
+  @apply bg-gray-900 text-gray-300;
+}
+
+.dark-mode .bg-gray-100 {
+  @apply bg-gray-700;
+}
+
+.dark-mode .text-gray-700 {
+  @apply text-gray-300;
+}
+@layer components {
+  .bannerIcon {
+    @apply w-16 h-16 bg-black bg-opacity-25 text-gray-200 text-xl inline-flex items-center justify-center rounded-md shadow-shadowOne hover:bg-opacity-40 hover:-translate-y-1 transition-all hover:text-designColor cursor-pointer duration-300;
+  }
+  .resumeLi {
+    @apply w-full h-20 bg-black bg-opacity-25 text-xl text-gray-300 flex justify-center cursor-pointer hover:bg-opacity-40 duration-300 items-center border-[1px] rounded-none;
+  }
+  .bgOpacity {
+    @apply bg-black bg-opacity-40;
+  }
+  .contactInput {
+    @apply w-full h-12 rounded-lg border-b-[1px] border-b-gray-600 bg-[#191b1e] text-lightText px-4 active:outline-none focus-visible:outline-designColor outline-none focus-visible:border-b-transparent duration-300;
+  }
+  .contactTextArea {
+    @apply w-full rounded-lg border-b-[1px] border-b-gray-600 bg-[#191b1e] text-lightText px-4 py-2 active:outline-none focus-visible:outline-designColor outline-none focus-visible:border-b-transparent duration-300 resize-none;
+  }
+}
+
+.active {
+  color: white;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
