@@ -5,7 +5,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const transectionTrackApi = createApi({
   reducerPath: "transectionTrackApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/transection/",
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/transection/ `,
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token");

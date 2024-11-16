@@ -5,7 +5,7 @@ export const stockItemsApi = createApi({
   reducerPath: "stockItemsApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/stocks",
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/stocks`,
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources

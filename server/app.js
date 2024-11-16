@@ -144,15 +144,15 @@ dotenv.config({ path: path.join(__dirname, "config/config.env") });
 // CORS options
 const corsOptions = {
   origin: [
+    "https://wellness-8.onrender.com",
     "http://localhost:5173",
-    "http://localhost:5174", // Add this line to include the new port
-    "http://localhost:3000",
-    process.env.CLIENT_URL,
+    "http://localhost:5174",
+    "https://www.alphacranesalpha.in",
+    process.env.FRONTEND_URL,
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 };
-
 // Create an instance of express
 const app = express();
 

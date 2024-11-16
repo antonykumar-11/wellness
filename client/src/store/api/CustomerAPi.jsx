@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Define the API slice
 export const customerApi = createApi({
   reducerPath: "customerApi", // A unique key for the reducer
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/api/v1/" }), // Base URL for API requests
+  baseQuery: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Base URL for API requests
   endpoints: (builder) => ({
     // Fetch all customers
     getAllCustomers: builder.query({

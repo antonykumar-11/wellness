@@ -4,7 +4,7 @@ export const servicePurchaseApi = createApi({
   reducerPath: "servicePurchaseApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/services/",
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/service/`,
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources

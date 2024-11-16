@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const financialApi = createApi({
   reducerPath: "financialApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/expenseexpense/",
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/expenseexpense/`,
   }),
   endpoints: (builder) => ({
     getGrossProfit: builder.query({

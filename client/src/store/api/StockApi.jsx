@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const stockApi = createApi({
   reducerPath: "stockApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/api/v1/" }),
+  baseQuery: `${import.meta.env.VITE_BACKEND_URL}/api/v1/employees`,
   tagTypes: ["Stock"],
   endpoints: (builder) => ({
     getAllStocks: builder.query({

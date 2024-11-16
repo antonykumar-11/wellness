@@ -4,7 +4,7 @@ export const payHeadDetailsApi = createApi({
   reducerPath: "payHeadDetailsApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/", // Corrected the URL
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Corrected the URL
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources

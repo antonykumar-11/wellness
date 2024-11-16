@@ -4,7 +4,7 @@ export const staffApi = createApi({
   reducerPath: "staffApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/employees",
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/employees`,
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources

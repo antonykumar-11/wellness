@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const attendanceEmployeeApi = createApi({
   reducerPath: "attendanceEmployeeApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/api/v1" }),
+  baseQuery: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
   endpoints: (builder) => ({
     getAttendancesByParams: builder.query({
       query: ({ employeeId, status, date, startDate, endDate }) => {
