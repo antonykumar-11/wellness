@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "postinstall": "npm rebuild bcrypt --build-from-source",
     "dev": "set NODE_ENV=development&&nodemon backend/app.js",
     "prod": "set NODE_ENV=production&&nodemon backend/app.js",
     "seeder": "node  seeder.js"
