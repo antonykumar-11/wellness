@@ -5,13 +5,12 @@ export const userApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
     prepareHeaders: (headers, { getState }) => {
-      const state = getState();
-      const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources
-      console.log("token", token);
+      const token =
+        getState().auth?.user?.token || localStorage.getItem("token");
+      console.log("Resolved token:", token); // Debugging
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
-
       return headers;
     },
   }),
