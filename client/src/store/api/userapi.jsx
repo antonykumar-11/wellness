@@ -78,7 +78,7 @@ export const userApi = createApi({
     // New register endpoint
     register: builder.mutation({
       query: (userData) => ({
-        url: `auth/register`,
+        url: `auth/register`, // Make sure there are no extra spaces here
         method: "POST",
         body: userData,
       }),
