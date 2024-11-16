@@ -141,14 +141,12 @@ const connectDatabase = require("./config/database");
 dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 // CORS options
-// CORS options
 const corsOptions = {
   origin: [
-    "https://wellness-8.onrender.com",
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "https://vedawellness.life",
-    process.env.FRONTEND_URL,
+    "https://wellness-8.onrender.com", // Frontend deployed on Render
+    "http://localhost:5173", // Local dev frontend (if you test locally)
+    "https://vedawellness.life", // Production frontend URL
+    process.env.FRONTEND_URL, // Make sure this resolves to the correct value
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
