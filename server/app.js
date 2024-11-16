@@ -147,7 +147,7 @@ const corsOptions = {
     "https://wellness-8.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://www.alphacranesalpha.in",
+    "https://vedawellness.life",
     process.env.FRONTEND_URL,
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
