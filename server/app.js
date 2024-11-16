@@ -14,7 +14,7 @@ const corsOptions = {
   origin: [
     "https://wellness-9.onrender.com", // Frontend deployed on Render
     "http://localhost:5173", // Local dev frontend (if you test locally)
-    "https://vedawellness.life", // Production frontend URL
+    // "https://vedawellness.life", // Production frontend URL
     process.env.FRONTEND_URL, // Make sure this resolves to the correct value
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
