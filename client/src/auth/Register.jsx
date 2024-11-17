@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useRegisterMutation } from "../store/api/userapi";
 import { Link, useNavigate } from "react-router-dom";
+import Image from "../auth/logo3.png"; // Use your background image
 
 const Register = () => {
   const [userData, setUserData] = useState({
     name: "",
     email: "",
     password: "",
-    bio: "",
+
     avatar: "",
   });
   const [avatar, setAvatar] = useState("");
@@ -34,13 +35,7 @@ const Register = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (
-      !userData.name ||
-      !userData.email ||
-      !userData.password ||
-      !userData.bio ||
-      !avatar
-    ) {
+    if (!userData.name || !userData.email || !userData.password || !avatar) {
       setError("All fields are required!");
       return;
     }
@@ -49,7 +44,7 @@ const Register = () => {
     formData.append("name", userData.name);
     formData.append("email", userData.email);
     formData.append("password", userData.password);
-    formData.append("bio", userData.bio);
+
     formData.append("avatar", avatar);
 
     try {
@@ -73,10 +68,11 @@ const Register = () => {
   return (
     <form
       onSubmit={submitHandler}
-      className="flex items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500"
+      style={{ backgroundImage: `url(${Image})` }}
+      className="flex items-center justify-center h-screen bg-cover bg-center px-4"
     >
-      <div className="w-full max-w-md bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg">
-        <h1 className="text-3xl font-semibold mb-4 text-white text-center">
+      <div className="w-full max-w-md bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-red-500 border-opacity-30">
+        <h1 className="text-3xl font-semibold mb-4 text-black text-center">
           User Profile Edit
         </h1>
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -88,7 +84,7 @@ const Register = () => {
           />
           <label
             htmlFor="avatar"
-            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-600 transition duration-300"
+            className="ml-4 bg-blue-500 text-gray-900 px-4 py-2 rounded-md cursor-pointer hover:bg-blue-600 transition duration-300"
           >
             Add Image
           </label>
@@ -101,75 +97,66 @@ const Register = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="name" className="block text-white">
+          <label htmlFor="name" className="block text-gray-800">
             Name
           </label>
           <input
             type="text"
             id="name"
             name="name"
+            placeholder="Enter your name"
             value={userData.name}
             onChange={onChange}
-            className="w-full border border-gray-300 rounded-md p-2 bg-white bg-opacity-20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-md p-2 bg-white bg-opacity-20 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="email" className="block text-white">
+          <label htmlFor="email" className="block text-gray-800">
             Email
           </label>
           <input
             type="email"
             id="email"
             name="email"
+            placeholder="Enter your Email"
             value={userData.email}
             onChange={onChange}
-            className="w-full border border-gray-300 rounded-md p-2 bg-white bg-opacity-20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-md p-2  bg-opacity-20 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+
         <div className="mb-4">
-          <label htmlFor="bio" className="block text-white">
-            Bio
-          </label>
-          <input
-            type="text"
-            id="bio"
-            name="bio"
-            value={userData.bio}
-            onChange={onChange}
-            className="w-full border border-gray-300 rounded-md p-2 bg-white bg-opacity-20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-white">
+          <label htmlFor="password" className="block text-gray-800">
             Password
           </label>
           <input
             type="password"
             id="password"
             name="password"
+            placeholder="Enter your password"
             value={userData.password}
             onChange={onChange}
-            className="w-full border border-gray-300 rounded-md p-2 bg-white bg-opacity-20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-md p-2 text-gray-900 bg-opacity-20  focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <div className="flex justify-between items-center">
-          <p className="mt-4 text-center text-white">
+        <div className="flex justify-center items-center">
+          <p className="mt-4 text-center text-gray-800">
             Already have an account?{" "}
             <Link
-              className="text-indigo-300 hover:text-indigo-500 focus:outline-none"
+              className="text-indigo-700 hover:text-red-700 focus:outline-none"
               to="/login"
             >
               Login
             </Link>
           </p>
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading ? "Submitting..." : "Submit"}
-          </button>
         </div>
+        <button
+          className=" w-full  mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? "Submitting..." : "Submit"}
+        </button>
       </div>
     </form>
   );

@@ -495,16 +495,50 @@ const SpecificEmployeeSalaryCalculator = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+  // Ensure totals is an array to avoid errors
+  const totalAttendance = Array.isArray(totals)
+    ? totals.reduce(
+        (summary, att) => {
+          summary.totalHoursWorked += att.dutyHours || 0;
+          summary.totalOvertime += att.overtime || 0;
+          summary.totalDaysWorked += att.totalDaysWorked || 0;
+          summary.totalPresentDays += att.status === "Present" ? 1 : 0;
+          summary.subtotalDaysWorked += att.totalDaysWorked || 0;
+          return summary;
+        },
+        {
+          totalDaysWorked: 0,
+          totalHoursWorked: 0,
+          totalOvertime: 0,
+          totalPresentDays: 0,
+          subtotalDaysWorked: 0,
+        }
+      )
+    : {
+        totalHoursWorked: 0,
+        totalOvertime: 0,
+        totalPresentDays: 0,
+        subtotalDaysWorked: 0,
+        totalDaysWorked: 0,
+      };
 
-  console.log("user", usersListUser);
-  console.log("totals", totals);
+  // Destructure the results
   const {
-    totalHoursWorked = 0,
-    totalOvertime = 0,
-    totalPresentDays = 0,
-    subtotalDaysWorked = 0,
-  } = totals;
-  console.log(" subtotalDaysWorked", subtotalDaysWorked);
+    totalHoursWorked,
+    totalOvertime,
+    totalPresentDays,
+    subtotalDaysWorked,
+    totalDaysWorked,
+  } = totalAttendance;
+
+  console.log(
+    totalHoursWorked,
+    totalOvertime,
+    totalPresentDays,
+    subtotalDaysWorked,
+    totalDaysWorked
+  );
+
   const { data: payHeadDetails = [], refetch: refetchPayHeadDetails } =
     useGetPayHeadDetailsByIdQuery({
       employeeId,
@@ -621,11 +655,12 @@ const SpecificEmployeeSalaryCalculator = () => {
         record.details.forEach((head) => {
           let headValue = 0;
           let hourlyRate = 0;
-
+          console.log("head.rate", head.rate);
+          console.log("head.totalDays", totalPresentDays);
           switch (head.calculationType) {
             case "As User Defined Value":
               headValue = roundToTwoDecimals(
-                (head.rate / head.totalDays) * totalPresentDays
+                (head.rate / head.totalDays) * subtotalDaysWorked || 1
               );
               break;
             case "As Manual Value":

@@ -4,10 +4,10 @@ export const payHeadDetailsApi = createApi({
   reducerPath: "payHeadDetailsApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Corrected the URL
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Corrected URL
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
-      const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources
+      const token = state.auth?.user?.token || localStorage.getItem("token");
 
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
@@ -19,7 +19,6 @@ export const payHeadDetailsApi = createApi({
   endpoints: (builder) => ({
     getPayHeadDetails: builder.query({
       query: ({ employeeId, date, startDate, endDate } = {}) => {
-        let url = "/payHeadDetails";
         const params = new URLSearchParams();
 
         if (employeeId) params.append("employeeId", employeeId);
@@ -27,38 +26,33 @@ export const payHeadDetailsApi = createApi({
         if (startDate) params.append("startDate", startDate);
         if (endDate) params.append("endDate", endDate);
 
-        if (params.toString()) {
-          url += `?${params.toString()}`;
-        }
-
+        const url = `payHeadDetails${
+          params.toString() ? `?${params.toString()}` : ""
+        }`;
         return url;
       },
     }),
 
     getPayHeadDetailsById: builder.query({
       query: ({ employeeId, date, startDate, endDate } = {}) => {
-        let url = "/payHeadDetails";
         const params = new URLSearchParams();
 
-        // Append parameters if they are provided
-        if (employeeId) params.append("employeeId", employeeId);
         if (date) params.append("date", date);
         if (startDate) params.append("startDate", startDate);
         if (endDate) params.append("endDate", endDate);
 
-        // Add parameters to URL if any exist
-        if (params.toString()) {
-          url += `?${params.toString()}`;
-        }
+        // Include employeeId in the path if provided
+        const url = employeeId
+          ? `payHeadDetails/${employeeId}?${params.toString()}`
+          : `payHeadDetails?${params.toString()}`;
 
         return url;
       },
     }),
 
-    // Create new pay head details
     createPayHeadDetails: builder.mutation({
-      query: (newPayHeadDetails) => ({
-        url: "/payHeadDetails",
+      query: ({ employeeId, newPayHeadDetails }) => ({
+        url: `payHeadDetails/${employeeId}`,
         method: "POST",
         body: newPayHeadDetails,
       }),
@@ -66,14 +60,15 @@ export const payHeadDetailsApi = createApi({
 
     updatePayHeadDetails: builder.mutation({
       query: ({ employeeId, ...updatedPayHeadDetails }) => ({
-        url: `/payHeadDetails/${employeeId}`,
+        url: `payHeadDetails/${employeeId}`,
         method: "PUT",
         body: updatedPayHeadDetails,
       }),
     }),
+
     deletePayHeadDetails: builder.mutation({
       query: (id) => ({
-        url: `/payHeadDetails/${id}`,
+        url: `payHeadDetails/${id}`,
         method: "DELETE",
       }),
     }),

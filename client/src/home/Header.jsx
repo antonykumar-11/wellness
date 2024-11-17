@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Menu as MenuIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import useTheme from "../context/Theme"; // Assuming you're using a ThemeContext
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,7 +12,6 @@ const Header = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth(); // Assuming you're using an AuthContext
   const [isModalOpen, setModalOpen] = useState(false);
-
   // Handle theme toggle
   const handleToggle = () => {
     if (themeMode === "light") {
@@ -27,14 +26,9 @@ const Header = ({ toggleSidebar }) => {
     navigate(`/reports/profile/${user._id}`); // Include user ID in the URL
   };
 
-  // Navigate to home page
-  const handleHomeClick = () => {
-    navigate("/"); // Redirect to the home page
-  };
-
   return (
     <header
-      className={`h-20 flex items-center justify-between border-b p-4 ${
+      className={`h-20 right flex items-center justify-between border-b p-4 ${
         themeMode === "dark"
           ? "bg-gray-800 border-gray-700"
           : "bg-yellow-500 border-slate-200"
@@ -75,6 +69,16 @@ const Header = ({ toggleSidebar }) => {
         </button>
       </div>
 
+      <button
+        onClick={() => setModalOpen(true)}
+        className="bg-green-500 text-white px-6 py-3 rounded"
+      >
+        <FontAwesomeIcon icon={faCalculator} className="mr-2" />
+      </button>
+      <CalculatorModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+      />
       {/* Sidebar toggle button for small screens */}
       <button
         className="md:hidden p-2"
@@ -82,14 +86,6 @@ const Header = ({ toggleSidebar }) => {
         aria-label="Toggle sidebar"
       >
         <MenuIcon size={24} />
-      </button>
-
-      {/* Home Redirect Button */}
-      <button
-        onClick={handleHomeClick}
-        className="bg-blue-500 text-white px-6 py-3 rounded ml-4"
-      >
-        Go Home
       </button>
     </header>
   );

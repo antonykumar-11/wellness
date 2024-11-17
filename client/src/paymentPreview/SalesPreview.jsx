@@ -25,6 +25,7 @@ import CreateStockModal from "../vouchers/dummy2/CreateStock";
 import Ledger from "../vouchers/dummy2/Ledger";
 import { FaPlus, FaBuilding, FaBook } from "react-icons/fa";
 import PaymentVoucher from "../payment1/PaymentDetails";
+import { useGetLedgerAllPurchaseQuery } from "../store/api/LedgerApi";
 const SalesPreview = () => {
   const navigate = useNavigate();
   const { transactionId } = useParams();
@@ -34,9 +35,10 @@ const SalesPreview = () => {
   const { data: ledgerData = [], refetch } = useGetLedgerQuery();
 
   const { data: stockData = [], refetch: stockItemsrefetch } =
-    useGetStockItemsQuery();
-
+    useGetLedgerAllPurchaseQuery();
+  console.log("stockdata", stockData);
   useEffect(() => {
+    // stockrefetch();
     stockItemsrefetch();
   }, [stockItemsrefetch]);
 
@@ -50,6 +52,7 @@ const SalesPreview = () => {
     purposeOfPayment: "",
     thisPurchase: "New bill", // Initial value matching dropdown
     status: "Unsettled",
+    saleInvoiceNumber: "",
     authorizedBy: {
       name: "",
       designation: "",
@@ -63,6 +66,8 @@ const SalesPreview = () => {
         id: 1,
         serialNumber: "1",
         stockName: "",
+        stockId: "",
+        actualrate: "",
         description: "",
         quantity: "",
         price: "",
@@ -361,15 +366,15 @@ const SalesPreview = () => {
     // Set the stock name for the selected index
     setSearchTerms((prev) => ({
       ...prev,
-      [index]: stock.stockName,
+      [index]: stock.name,
     }));
 
     setPurchaseData((prevData) => {
       const updatedItems = [...prevData.items];
       updatedItems[index] = {
         ...updatedItems[index],
-        stockGroupName: stock.stockName,
-        stockGroup: stock._id,
+        stockName: stock.name,
+        stockId: stock._id,
       };
       return { ...prevData, items: updatedItems };
     });
@@ -384,7 +389,7 @@ const SalesPreview = () => {
     // Ensure searchTerm is a string before proceeding
     const term = typeof searchTerm === "string" ? searchTerm : "";
     return stockData.filter((item) =>
-      item.stockName?.toLowerCase().includes(term.toLowerCase())
+      item.name?.toLowerCase().includes(term.toLowerCase())
     );
   };
   const handleCompanyCreation = async (newLedgerData) => {
@@ -456,7 +461,7 @@ const SalesPreview = () => {
         ...filteredVoucher,
         transactionId: _id || "", // Set the transactionId from selectedVoucher
       }));
-      console.log("paymentVoucher", paymentVoucher);
+
       // Set initial state for purchase data with formatted dates
       setPurchaseData({
         ...paymentVoucher,
@@ -485,19 +490,19 @@ const SalesPreview = () => {
 
       // Extract stockGroupNames from items and ensure 'items' exists
       if (paymentVoucher.items && paymentVoucher.items.length > 0) {
-        const stockGroupNames = paymentVoucher.items
-          .map((item) => item.stockGroupName)
+        const stockName = paymentVoucher.items
+          .map((item) => item.stockName)
           .filter(Boolean);
 
         // Convert stockGroupNames into an object with index-based keys
-        const stockGroupNamesObject = stockGroupNames.reduce(
-          (acc, name, index) => {
-            acc[index] = name; // Store each name with its index as the key
+        const stockGroupNamesObject = stockName.reduce(
+          (acc, stockName, index) => {
+            acc[index] = stockName; // Store each name with its index as the key
             return acc;
           },
           {}
         );
-
+        console.log("stockname /", stockGroupNamesObject);
         // Update searchTerms with the transformed stockGroupNames
         setSearchTerms((prev) => ({
           ...prev,
@@ -855,19 +860,35 @@ const SalesPreview = () => {
   const filteredData = filteredStockData(searchTermStock); // Filtered data based on search term
   return (
     <div className="p-6">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-        <div className="flex items-center gap-4 ">
-          V/N
-          <p className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-            {purchaseData.voucherNumber}
-          </p>
-        </div>
-      </div>
       {/* form field  */}
-      <form className="max-w-4xl mx-auto p-6 bg-gray-200 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10 ">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+      <form className="max-w-6xl mx-auto p-6 bg-gray-200 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10 ">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {/* Row 1 */}
+          <div className="flex flex-col">
+            <label className="text-gray-700 dark:text-gray-300">
+              Voucher Number
+            </label>
+            <input
+              type="number"
+              name="voucherNumber"
+              value={purchaseData.voucherNumber}
+              onChange={handleChange}
+              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
 
+          <div className="flex flex-col">
+            <label className="text-gray-700 dark:text-gray-300">
+              sales number
+            </label>
+            <input
+              type="text"
+              name="saleInvoiceNumber"
+              value={purchaseData.saleInvoiceNumber}
+              onChange={handleChange}
+              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
           <div className="flex flex-col">
             <label className="text-gray-700 dark:text-gray-300">
               Transaction Date
@@ -880,117 +901,8 @@ const SalesPreview = () => {
               className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Which Type of Purchase
-            </label>
-            <select
-              value={selectedVoucherIds}
-              onChange={(e) => setSelectedVoucherIds(e.target.value)}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="New bill">New Bill</option>
-              <option value="Advance">Advance</option>
-              <option value="Against bills">Against Bills</option>
-              <option value="New bill">New Bill</option>
-              <option value="Own bill">Own Bill</option>
-            </select>
-          </div>
 
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              creditPeriod
-            </label>
-            <input
-              type="number"
-              name="creditPeriod"
-              value={purchaseData.creditPeriod}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
           {/* Row 2 */}
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Status of Payment
-            </label>
-            <select
-              value={selectedPayments}
-              onChange={(e) => setSelectedPayments(e.target.value)}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="Unsettled">Unsettled</option>
-              <option value="Partially Settled">Partially Settled</option>
-              <option value="Settled">Settled</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Credit Amount
-            </label>
-            <input
-              type="number"
-              name="creditAmount"
-              value={purchaseData.creditAmount}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Credit Due Date
-            </label>
-            <input
-              type="date"
-              name="creditDueDate"
-              value={purchaseData.creditDueDate}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              sales number
-            </label>
-            <input
-              type="text"
-              name="purposeOfPayment"
-              value={purchaseData.purposeOfPayment}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          {/* Row 3 */}
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Authorized By Name
-            </label>
-            <input
-              type="text"
-              name="authorizedBy.name"
-              value={purchaseData.authorizedBy.name}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Designation
-            </label>
-            <input
-              type="text"
-              name="authorizedBy.designation"
-              value={purchaseData.authorizedBy.designation}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
 
           {/* Row 4 */}
           {/* Row 4 - Purchased By */}
@@ -1075,537 +987,70 @@ const SalesPreview = () => {
             )}
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={purchaseData.description}
-              onChange={handleChange}
-              rows="4"
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-        </div>
-      </form>
-      {/* ithu main table container*/}
-      {/* Table container */}
-      <div className="hidden lg:block mt-10  dark:border-slate-50 dark:border-2 dark:rounded-lg">
-        <div className="">
-          <table className="min-w-full bg-white  dark:bg-gray-800">
-            <thead className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                {[
-                  "HSN Code",
-                  "Rate",
-                  "Quantity",
-                  "Tax Rate", // Added Tax Rate header
-                  "Tax Amount", // Added Tax Amount header
-                  "Amount",
-                  "Stock Item",
-                  "Actions",
-                ].map((header) => (
-                  <th
-                    key={header}
-                    scope="col"
-                    className="py-2 px-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className=" dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-              {purchaseData.items.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className="text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="text"
-                      value={item.hsnCode}
-                      onChange={(e) =>
-                        handleItemChange(index, "hsnCode", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="number"
-                      value={item.rate}
-                      onChange={(e) =>
-                        handleItemChange(index, "rate", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleItemChange(index, "quantity", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-
-                  {/* Tax Rate Field */}
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="number"
-                      value={item.taxRate}
-                      onChange={(e) =>
-                        handleItemChange(index, "taxRate", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-
-                  {/* Tax Amount Field */}
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="number"
-                      value={
-                        item.taxAmount || (item.taxRate * item.amount) / 100
-                      }
-                      readOnly
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="number"
-                      value={item.amount}
-                      readOnly
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchTerms[index] || ""} // Use empty string if undefined
-                        onClick={() =>
-                          setIsDropdownOpen((prev) => ({
-                            ...prev,
-                            [index]: !prev[index],
-                          }))
-                        }
-                        onChange={(e) => {
-                          // Update the search term for the specific index
-                          setSearchTerms((prev) => ({
-                            ...prev,
-                            [index]: e.target.value, // Correctly set the current value
-                          }));
-                        }}
-                        className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                      />
-                      {isDropdownOpen[index] && (
-                        <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto dark:bg-gray-800 dark:text-white">
-                          {filteredStockData(searchTerms[index] || "").length >
-                          0 ? (
-                            filteredStockData(searchTerms[index] || []).map(
-                              (option) => (
-                                <li
-                                  key={option._id}
-                                  onClick={() =>
-                                    handleStockSelect(index, option)
-                                  }
-                                  className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                                >
-                                  {option.stockName}
-                                </li>
-                              )
-                            )
-                          ) : (
-                            <li className="px-4 py-2 text-gray-500 dark:text-gray-400">
-                              No data
-                            </li>
-                          )}
-                        </ul>
-                      )}
-                    </div>
-                  </td>
-
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <button
-                      onClick={() => deleteItem(index)}
-                      className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {/* Responsive Items Create */}
-      <div className="lg:hidden mt-10">
-        {purchaseData.items.map((item, index) => (
-          <div
-            key={item.id}
-            className="border-b border-gray-200 dark:border-gray-700 mb-4 p-4"
-          >
-            {/* Stock Items Dropdown */}
-            <div className="font-bold mb-2 mt-4  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-              Stock Items
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerms[index] || ""} // Use empty string if undefined
-                onClick={() =>
-                  setIsDropdownOpen((prev) => ({
-                    ...prev,
-                    [index]: !prev[index],
-                  }))
-                }
-                onChange={(e) => {
-                  // Update the search term for the specific index
-                  setSearchTerms((prev) => ({
-                    ...prev,
-                    [index]: e.target.value, // Correctly set the current value
-                  }));
-                }}
-                className="w-full px-2 py-1 border rounded  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white"
-              />
-              {isDropdownOpen[index] && (
-                <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto  whitespace-nowrap  dark:bg-gray-800 dark:text-white">
-                  {filteredStockData(searchTerms[index] || "").length > 0 ? (
-                    filteredStockData(searchTerms[index] || []).map(
-                      (option) => (
-                        <li
-                          key={option._id}
-                          onClick={() => handleStockSelect(index, option)}
-                          className="px-4 py-2 cursor-pointer hover:bg-gray-200  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white"
-                        >
-                          {" "}
-                          {console.log("option", option.stockName)}
-                          {option.stockName}
-                        </li>
-                      )
-                    )
-                  ) : (
-                    <li className="px-4 py-2 text-gray-500">No data</li>
-                  )}
-                </ul>
-              )}
-            </div>
-
-            {/* Other Input Fields */}
-
-            <div className="font-bold mb-2 mt-4">HSN Code</div>
-            <input
-              type="text"
-              value={item.hsnCode}
-              onChange={(e) =>
-                handleItemChange(index, "hsnCode", e.target.value)
-              }
-              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-
-            <div className="font-bold mb-2 mt-4">Rate</div>
-            <input
-              type="number"
-              value={item.rate}
-              onChange={(e) => handleItemChange(index, "rate", e.target.value)}
-              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-
-            <div className="font-bold mb-2 mt-4">Quantity</div>
-            <input
-              type="number"
-              value={item.quantity}
-              onChange={(e) =>
-                handleItemChange(index, "quantity", e.target.value)
-              }
-              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-
-            {/* Tax Rate Field */}
-            <div className="font-bold mb-2 mt-4">Tax Rate (%)</div>
-            <input
-              type="number"
-              value={item.taxRate}
-              onChange={(e) =>
-                handleItemChange(index, "taxRate", e.target.value)
-              }
-              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-
-            {/* Tax Amount (Auto-calculated) */}
-            <div className="font-bold mb-2 mt-4">Tax Amount</div>
-            <input
-              type="number"
-              value={item.taxAmount || (item.taxRate * item.amount) / 100}
-              readOnly
-              className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
-            />
-
-            {/* Amount Field (Read-only) */}
-            <div className="font-bold mb-2 mt-4">Amount</div>
-            <input
-              type="number"
-              value={item.amount}
-              readOnly
-              className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
-            />
-
-            {/* Delete Button */}
-            <div className="mt-4 text-right">
-              <button
-                onClick={() => deleteItem(index)}
-                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/*buttons*/}
-      {/*buttons*/}
-      <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mt-10">
-        <button
-          onClick={addItem}
-          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800"
-        >
-          <FaPlus className="mr-2" /> {/* Add icon */}
-          Add Item
-        </button>
-
-        <button
-          onClick={openLedgerModal}
-          className="flex items-center bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800"
-        >
-          <FaBook className="mr-2" /> {/* Add icon */}
-          Add Ledger
-        </button>
-
-        {isLedgerModalOpen && (
-          <Ledger
-            closeModal={closeLedgerModal}
-            onLedgerCreate={handleLedgerCreation}
-          />
-        )}
-
-        <button
-          onClick={openModal}
-          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-        >
-          <FaBuilding className="mr-2" /> {/* Add icon */}
-          Add Company
-        </button>
-
-        {isModalOpen && (
-          <CreateCompanyModal
-            closeModal={closeModal}
-            onComapnyCreate={handleCompanyCreation}
-            isLoading={isLoading}
-            themeMode="dark"
-          />
-        )}
-
-        <button
-          onClick={openModali}
-          className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-        >
-          <FaPlus className="mr-2" /> {/* Add icon */}
-          Stock group
-        </button>
-
-        {isModalOpeni && (
-          <CreateStockModal
-            onClose={closeModali}
-            createStockGroup={handleStockCreation}
-          />
-        )}
-      </div>
-
-      {/* tax field dummy */}
-      {/* tax field  */}
-      <div className="flex flex-wrap gap-4 justify-center mt-10">
-        {/* Tax Rate */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="taxRate"
-          >
-            Tax Rate (%)
-          </label>
-          <input
-            type="number"
-            name="taxRate"
-            id="taxRate"
-            value={purchaseData.taxRate || ""}
-            onChange={(e) =>
-              setPurchaseData((prevData) => ({
-                ...prevData,
-                taxRate: e.target.value,
-              }))
-            }
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          />
-        </div>
-
-        {/* Tax Amount */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="taxAmount"
-          >
-            Tax Amount
-          </label>
-          <input
-            type="number"
-            name="taxAmount"
-            id="taxAmount"
-            value={
-              typeof purchaseData.taxAmount === "number"
-                ? purchaseData.taxAmount.toFixed(2)
-                : "0.00"
-            }
-            readOnly
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-          />
-        </div>
-
-        {/* Subtotal */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="subTotal"
-          >
-            Subtotal
-          </label>
-          <input
-            type="number"
-            name="subTotal"
-            id="subTotal"
-            value={
-              typeof purchaseData.subTotal === "number"
-                ? purchaseData.subTotal.toFixed(2)
-                : "0.00"
-            }
-            readOnly
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-          />
-        </div>
-
-        {/* Total */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="total"
-          >
-            Total
-          </label>
-          <input
-            type="number"
-            name="total"
-            id="total"
-            value={
-              typeof purchaseData.total === "number"
-                ? purchaseData.total.toFixed(2)
-                : "0.00"
-            }
-            readOnly
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-          />
-        </div>
-      </div>
-      {/* Tax Ledger dummy */}
-
-      <div className="space-y-4 md:space-y-6 mt-10">
-        <div className="flex flex-wrap gap-4 justify-center">
-          {/* Tax Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
+          {/* Tax Amount */}
+          <div className="flex-1 min-w-[200px]">
             <label
               className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="taxLedger"
+              htmlFor="taxAmount"
             >
-              Tax in purchase
+              Tax Amount
             </label>
             <input
-              type="text"
-              name="taxLedger"
-              id="taxLedger"
+              type="number"
+              name="taxAmount"
+              id="taxAmount"
               value={
-                debitNote.creditLedgers?.[0]?.ledgerName ||
-                "Please fill in the tax ledger"
+                typeof purchaseData.taxAmount === "number"
+                  ? purchaseData.taxAmount.toFixed(2)
+                  : "0.00"
               }
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
-                !debitNote.debitLedgers?.[0]?.ledgerName
-                  ? "text-red-500"
-                  : "text-gray-700"
-              }`}
               readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
             />
           </div>
-          {/* Credit Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="creditLedger"
-            >
-              Credit in purchase Ledger
-            </label>
-            <input
-              type="text"
-              name="creditLedger"
-              id="creditLedger"
-              value={
-                debitNote.creditLedgers?.[1]?.ledgerName ||
-                "Please fill in the credit ledger"
-              }
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
-                !debitNote.creditLedgers?.[0]?.ledgerName
-                  ? "text-red-500"
-                  : "text-gray-700"
-              }`}
-              readOnly
-            />
-          </div>
-          {/* Debit Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="debitLedger"
-            >
-              Debit in purchase Ledger
-            </label>
-            <input
-              type="text"
-              name="debitLedger"
-              id="debitLedger"
-              value={
-                debitNote.debitLedgers?.[0]?.ledgerName ||
-                "Please fill in the debit ledger"
-              }
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
-                !debitNote.debitLedgers?.[1]?.ledgerName
-                  ? "text-red-500"
-                  : "text-gray-700"
-              }`}
-              readOnly
-            />
-          </div>
-        </div>
-      </div>
 
-      {/* Tax Ledger */}
-      <div className="space-y-4 md:space-y-6 mt-10">
-        <div className="flex flex-wrap gap-4 justify-center">
+          {/* Subtotal */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="subTotal"
+            >
+              Subtotal
+            </label>
+            <input
+              type="number"
+              name="subTotal"
+              id="subTotal"
+              value={
+                typeof purchaseData.subTotal === "number"
+                  ? purchaseData.subTotal.toFixed(2)
+                  : "0.00"
+              }
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
+          {/* Total */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="total"
+            >
+              Total
+            </label>
+            <input
+              type="number"
+              name="total"
+              id="total"
+              value={
+                typeof purchaseData.total === "number"
+                  ? purchaseData.total.toFixed(2)
+                  : "0.00"
+              }
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
           {/* Tax Ledger */}
           <div className="relative flex-1 min-w-[200px]">
             <label
@@ -1775,31 +1220,376 @@ const SalesPreview = () => {
             )}
           </div>
         </div>
-      </div>
-      {/* Submit Button */}
-      <div className="my-10">
-        {/* Buttons for updating and deleting */}
-        <div className="my-10 flex space-x-4">
-          {/* Update Button */}
-          <button
-            type="button"
-            onClick={handleUpdate} // Update logic
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-blue-700"
-            disabled={isLoading}
-          >
-            {isLoading ? "Updating..." : "Update"}
-          </button>
+      </form>
+      {/* ithu main table container*/}
+      {/* Table container */}
+      <div className="hidden lg:block mt-10  dark:border-slate-50 dark:border-2 dark:rounded-lg">
+        <div className="">
+          <table className="min-w-full bg-white  dark:bg-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                {[
+                  "Item Descriptions",
+                  "HSN Code",
+                  "actualrate",
+                  "Rate",
 
-          {/* Delete Button */}
-          <button
-            type="button"
-            onClick={handleDeletePayment} // Delete logic
-            className="bg-red-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-red-700"
-            disabled={isLoading}
-          >
-            {isLoading ? "Deleting..." : "Delete"}
-          </button>
+                  "Tax Rate", // Added Tax Rate header
+                  "Tax Amount", // Added Tax Amount header
+                  "Amount",
+
+                  "Actions",
+                ].map((header) => (
+                  <th
+                    key={header}
+                    scope="col"
+                    className="py-2 px-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className=" dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+              {purchaseData.items.map((item, index) => (
+                <tr
+                  key={item.id}
+                  className="text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchTerms[index] || ""} // Use empty string if undefined
+                        onClick={() =>
+                          setIsDropdownOpen((prev) => ({
+                            ...prev,
+                            [index]: !prev[index],
+                          }))
+                        }
+                        onChange={(e) => {
+                          // Update the search term for the specific index
+                          setSearchTerms((prev) => ({
+                            ...prev,
+                            [index]: e.target.value, // Correctly set the current value
+                          }));
+                        }}
+                        className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                      />
+                      {isDropdownOpen[index] && (
+                        <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto dark:bg-gray-800 dark:text-white">
+                          {filteredStockData(searchTerms[index] || "").length >
+                          0 ? (
+                            filteredStockData(searchTerms[index] || []).map(
+                              (option) => (
+                                <li
+                                  key={option._id}
+                                  onClick={() =>
+                                    handleStockSelect(index, option)
+                                  }
+                                  className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                                >
+                                  {option.name}
+                                </li>
+                              )
+                            )
+                          ) : (
+                            <li className="px-4 py-2 text-gray-500 dark:text-gray-400">
+                              No data
+                            </li>
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                  </td>
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <input
+                      type="text"
+                      value={item.hsnCode}
+                      onChange={(e) =>
+                        handleItemChange(index, "hsnCode", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <input
+                      type="number"
+                      value={item.actualrate}
+                      onChange={(e) =>
+                        handleItemChange(index, "actualrate", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <input
+                      type="number"
+                      value={item.rate}
+                      onChange={(e) =>
+                        handleItemChange(index, "rate", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
+
+                  {/* Tax Rate Field */}
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <input
+                      type="number"
+                      value={item.taxRate}
+                      onChange={(e) =>
+                        handleItemChange(index, "taxRate", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
+
+                  {/* Tax Amount Field */}
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <input
+                      type="number"
+                      value={
+                        item.taxAmount || (item.taxRate * item.amount) / 100
+                      }
+                      readOnly
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
+
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <input
+                      type="number"
+                      value={item.amount}
+                      readOnly
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
+
+                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                    <button
+                      onClick={() => deleteItem(index)}
+                      className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      </div>
+      {/* Responsive Items Create */}
+      <div className="lg:hidden mt-10">
+        {purchaseData.items.map((item, index) => (
+          <div
+            key={item.id}
+            className="border-b border-gray-200 dark:border-gray-700 mb-4 p-4"
+          >
+            {/* Stock Items Dropdown */}
+            <div className="font-bold mb-2 mt-4  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+              Stock Items
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerms[index] || ""} // Use empty string if undefined
+                onClick={() =>
+                  setIsDropdownOpen((prev) => ({
+                    ...prev,
+                    [index]: !prev[index],
+                  }))
+                }
+                onChange={(e) => {
+                  // Update the search term for the specific index
+                  setSearchTerms((prev) => ({
+                    ...prev,
+                    [index]: e.target.value, // Correctly set the current value
+                  }));
+                }}
+                className="w-full px-2 py-1 border rounded  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white"
+              />
+              {isDropdownOpen[index] && (
+                <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto  whitespace-nowrap  dark:bg-gray-800 dark:text-white">
+                  {filteredStockData(searchTerms[index] || "").length > 0 ? (
+                    filteredStockData(searchTerms[index] || []).map(
+                      (option) => (
+                        <li
+                          key={option._id}
+                          onClick={() => handleStockSelect(index, option)}
+                          className="px-4 py-2 cursor-pointer hover:bg-gray-200  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white"
+                        >
+                          {" "}
+                          {console.log("option", option.stockName)}
+                          {option.stockName}
+                        </li>
+                      )
+                    )
+                  ) : (
+                    <li className="px-4 py-2 text-gray-500">No data</li>
+                  )}
+                </ul>
+              )}
+            </div>
+
+            {/* Other Input Fields */}
+
+            <div className="font-bold mb-2 mt-4">HSN Code</div>
+            <input
+              type="text"
+              value={item.hsnCode}
+              onChange={(e) =>
+                handleItemChange(index, "hsnCode", e.target.value)
+              }
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+            <div className="font-bold mb-2 mt-4">Actual Rate</div>
+            <input
+              type="number"
+              value={item.actualrate}
+              onChange={(e) =>
+                handleItemChange(index, "actualrate", e.target.value)
+              }
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+            <div className="font-bold mb-2 mt-4">Rate</div>
+            <input
+              type="number"
+              value={item.rate}
+              onChange={(e) => handleItemChange(index, "rate", e.target.value)}
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+
+            <div className="font-bold mb-2 mt-4">Quantity</div>
+            <input
+              type="number"
+              value={item.quantity}
+              onChange={(e) =>
+                handleItemChange(index, "quantity", e.target.value)
+              }
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+
+            {/* Tax Rate Field */}
+            <div className="font-bold mb-2 mt-4">Tax Rate (%)</div>
+            <input
+              type="number"
+              value={item.taxRate}
+              onChange={(e) =>
+                handleItemChange(index, "taxRate", e.target.value)
+              }
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+
+            {/* Tax Amount (Auto-calculated) */}
+            <div className="font-bold mb-2 mt-4">Tax Amount</div>
+            <input
+              type="number"
+              value={item.taxAmount || (item.taxRate * item.amount) / 100}
+              readOnly
+              className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
+            />
+
+            {/* Amount Field (Read-only) */}
+            <div className="font-bold mb-2 mt-4">Amount</div>
+            <input
+              type="number"
+              value={item.amount}
+              readOnly
+              className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
+            />
+
+            {/* Delete Button */}
+            <div className="mt-4 text-right">
+              <button
+                onClick={() => deleteItem(index)}
+                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/*buttons*/}
+      {/*buttons*/}
+      <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mt-10">
+        <button
+          onClick={addItem}
+          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800"
+        >
+          <FaPlus className="mr-2" /> {/* Add icon */}
+          Add Item
+        </button>
+
+        <button
+          onClick={openLedgerModal}
+          className="flex items-center bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800"
+        >
+          <FaBook className="mr-2" /> {/* Add icon */}
+          Add Ledger
+        </button>
+
+        {isLedgerModalOpen && (
+          <Ledger
+            closeModal={closeLedgerModal}
+            onLedgerCreate={handleLedgerCreation}
+          />
+        )}
+
+        <button
+          onClick={openModal}
+          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+        >
+          <FaBuilding className="mr-2" /> {/* Add icon */}
+          Add Company
+        </button>
+
+        {isModalOpen && (
+          <CreateCompanyModal
+            closeModal={closeModal}
+            onComapnyCreate={handleCompanyCreation}
+            isLoading={isLoading}
+            themeMode="dark"
+          />
+        )}
+
+        <button
+          onClick={openModali}
+          className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+        >
+          <FaPlus className="mr-2" /> {/* Add icon */}
+          Stock group
+        </button>
+
+        {isModalOpeni && (
+          <CreateStockModal
+            onClose={closeModali}
+            createStockGroup={handleStockCreation}
+          />
+        )}
+        <button
+          type="button"
+          onClick={handleUpdate} // Update logic
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-blue-700"
+          disabled={isLoading}
+        >
+          {isLoading ? "Updating..." : "Update"}
+        </button>
+
+        {/* Delete Button */}
+        <button
+          type="button"
+          onClick={handleDeletePayment} // Delete logic
+          className="bg-red-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-red-700"
+          disabled={isLoading}
+        >
+          {isLoading ? "Deleting..." : "Delete"}
+        </button>
       </div>
     </div>
   );

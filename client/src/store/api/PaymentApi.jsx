@@ -5,6 +5,7 @@ export const paymentApi = createApi({
   reducerPath: "paymentApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
+
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources
@@ -33,10 +34,10 @@ export const paymentApi = createApi({
       query: () => `/payments/check`,
     }),
     updatePayment: builder.mutation({
-      query: ({ transactionId, updatedPayment }) => ({
+      query: ({ transactionId, ...voucherData }) => ({
         url: `/payments/${transactionId}`, // Ensure this matches your route
         method: "PUT",
-        body: updatedPayment, // This should include updatedPurchase
+        body: voucherData, // This should include updatedPurchase
       }),
     }),
 

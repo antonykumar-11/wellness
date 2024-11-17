@@ -16,18 +16,6 @@ function InvoiceHeader() {
         >
           invoice preview
         </NavLink>
-        <NavLink
-          to="/invoice/customerManagement"
-          className="px-3 py-1 no-underline rounded hover:text-white hover:bg-black dark:hover:bg-gradient-to-r from-green-400 to-blue-500"
-        >
-          customerManagement
-        </NavLink>
-        <NavLink
-          to="/invoice/GetCustomer"
-          className="px-3 py-1 no-underline rounded hover:text-white hover:bg-black dark:hover:bg-gradient-to-r from-green-400 to-blue-500"
-        >
-          GetCustomer
-        </NavLink>
       </div>
     </div>
   );

@@ -3,8 +3,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const ledgerApi = createApi({
   reducerPath: "ledgerApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Correct usage of fetchBaseQuery
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
   }),
+
   tagTypes: ["Ledger"],
   endpoints: (builder) => ({
     getAllLedgersWithTransactions: builder.query({
@@ -18,8 +19,8 @@ export const ledgerApi = createApi({
           return [{ type: "Ledger", id: "LIST" }];
         }
         return [
-          ...result.map(({ id }) => ({ type: "Ledger", id })), // Map each ledger to a tag
-          { type: "Ledger", id: "LIST" }, // Add a tag for the list
+          ...result.map(({ id }) => ({ type: "Ledger", id })),
+          { type: "Ledger", id: "LIST" },
         ];
       },
     }),

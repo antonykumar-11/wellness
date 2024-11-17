@@ -22,6 +22,8 @@ import {
   useDeletePurchaseMutation,
   useCheckVoucherNumberQuery,
 } from "../store/api/PurchaseApi";
+
+import { useGetStockGroupsQuery } from "../store/api/StockGroupApi";
 import { useGetLedgerAllPurchaseQuery } from "../store/api/LedgerApi";
 import { useCreateStockItemMutation } from "../store/api/StockItemsApi";
 import { useGetPaymentsQuery } from "../store/api/PaymentApi";
@@ -33,7 +35,7 @@ const PurchaseVoucher = () => {
   const { data: ledgerData = [], refetch } = useGetLedgerQuery();
   console.log("data", ledgerData);
   const { data: stockData = [], refetch: stockrefetch } =
-    useGetLedgerAllPurchaseQuery();
+    useGetStockGroupsQuery();
   const [createLedger] = useCreateLedgerMutation(); // Hook for creating new ledger
   const [localLedgerData, setLocalLedgerData] = useState([]); // Local ledger state for dropdown
   const [createStockGroup] = useCreateStockGroupMutation();
@@ -125,7 +127,8 @@ const PurchaseVoucher = () => {
 
   // Logic to handle validation
   //logic for
-
+  const { data: ledgerItems = [], refetch: stockrefetchok } =
+    useGetStockGroupsQuery();
   const { data: voucherCheck } = useCheckVoucherNumberQuery();
   console.log("voucherCheck ", voucherCheck);
   const [selectedVoucherIds, setSelectedVoucherIds] = useState("");
@@ -439,7 +442,7 @@ const PurchaseVoucher = () => {
       // Extract stockGroupNames from items and ensure 'items' exists
       if (paymentVoucher.items && paymentVoucher.items.length > 0) {
         const stockGroupNames = paymentVoucher.items
-          .map((item) => item.stockGroupName)
+          .map((item) => item.stockName)
           .filter(Boolean);
 
         // Convert stockGroupNames into an object with index-based keys
@@ -894,7 +897,7 @@ const PurchaseVoucher = () => {
       const updatedItems = [...prevData.items];
       updatedItems[index] = {
         ...updatedItems[index],
-        stockGroupName: stock.name,
+        stockName: stock.name,
         stockGroup: stock._id,
       };
       return { ...prevData, items: updatedItems };
@@ -909,7 +912,7 @@ const PurchaseVoucher = () => {
   const filteredStockData = (searchTerm) => {
     // Ensure searchTerm is a string before proceeding
     const term = typeof searchTerm === "string" ? searchTerm : "";
-    return stockData.filter((item) =>
+    return ledgerItems.filter((item) =>
       item.name?.toLowerCase().includes(term.toLowerCase())
     );
   };
@@ -945,8 +948,8 @@ const PurchaseVoucher = () => {
         </div>
       </div>
       {/* form field  */}
-      <form className="max-w-4xl mx-auto p-6 bg-gray-200 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10 ">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+      <form className="max-w-6xl mx-auto p-6 bg-gray-200 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10 ">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {/* Row 1 */}
 
           <div className="flex flex-col">
@@ -961,87 +964,6 @@ const PurchaseVoucher = () => {
               className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Which Type of Purchase
-            </label>
-            <select
-              value={voucherIdsPreview}
-              onChange={(e) => {
-                const selectedValue = e.target.value;
-                setSelectedVoucherIds(selectedValue);
-                setVoucherIdsPreview(selectedValue);
-              }}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value=" ">Select...</option>
-              <option value="Advance">Advance</option>
-              <option value="Against bills">Against Bills</option>
-              <option value="New bill">New Bill</option>
-              <option value="Own bill">Own Bill</option>
-              <option value="Partially Settled">Partially Settled</option>{" "}
-              {/* Add this option */}
-            </select>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              creditPeriod
-            </label>
-            <input
-              type="number"
-              name="creditPeriod"
-              value={purchaseData.creditPeriod}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          {/* Row 2 */}
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Status of Payment
-            </label>
-            <select
-              value={selectedPaymentsPreview}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSelectedPayments(value);
-                setSelectedPaymentsPreview(value);
-              }}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="Unsettled">Unsettled</option>
-              <option value="Partially Settled">Partially Settled</option>
-              <option value="Settled">Settled</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Credit Amount
-            </label>
-            <input
-              type="number"
-              name="creditAmount"
-              value={purchaseData.creditAmount}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Credit Due Date
-            </label>
-            <input
-              type="date"
-              name="creditDueDate"
-              value={purchaseData.creditDueDate}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
 
           <div className="flex flex-col">
             <label className="text-gray-700 dark:text-gray-300">
@@ -1051,33 +973,6 @@ const PurchaseVoucher = () => {
               type="text"
               name="purposeOfPayment"
               value={purchaseData.purposeOfPayment}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          {/* Row 3 */}
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Authorized By Name
-            </label>
-            <input
-              type="text"
-              name="authorizedBy.name"
-              value={purchaseData.authorizedBy.name}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Designation
-            </label>
-            <input
-              type="text"
-              name="authorizedBy.designation"
-              value={purchaseData.authorizedBy.designation}
               onChange={handleChange}
               className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
             />
@@ -1165,25 +1060,232 @@ const PurchaseVoucher = () => {
               </div>
             )}
           </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Description
+          {/* Tax Amount */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="taxAmount"
+            >
+              Tax Amount
             </label>
-            <textarea
-              name="description"
-              value={purchaseData.description}
-              onChange={handleChange}
-              rows="4"
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+            <input
+              type="number"
+              name="taxAmount"
+              id="taxAmount"
+              value={purchaseData.taxAmount || ""}
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
             />
+          </div>
+
+          {/* Subtotal */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="subTotal"
+            >
+              Subtotal
+            </label>
+            <input
+              type="number"
+              name="subTotal"
+              id="subTotal"
+              value={purchaseData.subTotal || ""}
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
+
+          {/* Total */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="total"
+            >
+              Total
+            </label>
+            <input
+              type="number"
+              name="total"
+              id="total"
+              value={purchaseData.total || ""}
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
+          <div className="relative flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="taxLedger"
+            >
+              Tax Ledger
+            </label>
+            <input
+              type="text"
+              name="taxLedger"
+              id="taxLedger"
+              value={taxDropdownState.searchTerm}
+              onClick={() =>
+                setTaxDropdownState((prevState) => ({
+                  ...prevState,
+                  isDropdownOpen: !prevState.isDropdownOpen,
+                }))
+              }
+              onChange={(e) =>
+                setTaxDropdownState((prevState) => ({
+                  ...prevState,
+                  searchTerm: e.target.value,
+                }))
+              }
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+            {taxDropdownState.isDropdownOpen && (
+              <div
+                ref={taxDropdownRef}
+                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
+              >
+                <ul className="max-h-40 overflow-auto">
+                  {filteredTaxData(taxDropdownState.searchTerm).length > 0 ? (
+                    filteredTaxData(taxDropdownState.searchTerm).map(
+                      (option) => (
+                        <li
+                          key={option._id}
+                          onClick={() => {
+                            handleTaxSelect(option);
+                            setTaxDropdownState((prevState) => ({
+                              ...prevState,
+                              isDropdownOpen: false, // Close dropdown after selection
+                            }));
+                          }}
+                          className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          {option.name}
+                        </li>
+                      )
+                    )
+                  ) : (
+                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                      No data
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Debit Ledger */}
+          <div className="relative flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="debitLedger"
+            >
+              Debit Ledger
+            </label>
+            <input
+              type="text"
+              name="debitLedger"
+              id="debitLedger"
+              value={searchTermDebit}
+              onClick={() =>
+                setIsDropdownOpen((prevState) => ({
+                  ...prevState,
+                  debit: !prevState.debit,
+                }))
+              }
+              onChange={(e) => setSearchTermDebit(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+            {isDropdownOpen.debit && (
+              <div
+                ref={dropdownRefs.debit}
+                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
+              >
+                <ul className="max-h-40 overflow-auto">
+                  {filteredLedgerData(searchTermDebit).length > 0 ? (
+                    filteredLedgerData(searchTermDebit).map((option) => (
+                      <li
+                        key={option._id}
+                        onClick={() => {
+                          handleLedgerSelect("debit", option);
+                          setIsDropdownOpen((prevState) => ({
+                            ...prevState,
+                            debit: false, // Close dropdown after selection
+                          }));
+                        }}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        {option.name}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                      No data
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Credit Ledger */}
+          <div className="relative flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="creditLedger"
+            >
+              Credit Ledger
+            </label>
+            <input
+              type="text"
+              name="creditLedger"
+              id="creditLedger"
+              value={searchTermCredit}
+              onClick={() =>
+                setIsDropdownOpen((prevState) => ({
+                  ...prevState,
+                  credit: !prevState.credit,
+                }))
+              }
+              onChange={(e) => setSearchTermCredit(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+            {isDropdownOpen.credit && (
+              <div
+                ref={dropdownRefs.credit}
+                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
+              >
+                <ul className="max-h-40 overflow-auto">
+                  {filteredLedgerData(searchTermCredit).length > 0 ? (
+                    filteredLedgerData(searchTermCredit).map((option) => (
+                      <li
+                        key={option._id}
+                        onClick={() => {
+                          handleLedgerSelect("credit", option);
+                          setIsDropdownOpen((prevState) => ({
+                            ...prevState,
+                            credit: false, // Close dropdown after selection
+                          }));
+                        }}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        {option.name}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                      No data
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </form>
       {/* ithu main table container*/}
       {/* Table container */}
       {/* Table container */}
-      <div className="hidden lg:block mt-10  dark:border-slate-50 dark:border-2 dark:rounded-lg">
+      <div className="hidden lg:block mt-10  dark:border-slate-50 dark:border-2 dark:rounded-lg bg-white dark:bg-gray-800 dark:text-white">
         <div>
           <table className="min-w-full bg-white  dark:bg-gray-800">
             <thead className="bg-red-500 dark:bg-gray-800">
@@ -1201,7 +1303,7 @@ const PurchaseVoucher = () => {
                   <th
                     key={header}
                     scope="col"
-                    className="py-2 px-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    className=" py-2 px-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
                   >
                     {header}
                   </th>
@@ -1212,7 +1314,7 @@ const PurchaseVoucher = () => {
               {purchaseData.items.map((item, index) => (
                 <tr
                   key={item.id}
-                  className="text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
+                  className="text-sm hover:bg-gray-200 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 dark:text-white"
                 >
                   <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
                     <input
@@ -1306,11 +1408,11 @@ const PurchaseVoucher = () => {
                             filteredStockData(searchTerms[index] || []).map(
                               (option) => (
                                 <li
+                                  className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
                                   key={option._id}
                                   onClick={() =>
                                     handleStockSelect(index, option)
                                   }
-                                  className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
                                 >
                                   {option.name}
                                 </li>
@@ -1512,344 +1614,6 @@ const PurchaseVoucher = () => {
             createStockGroup={handleStockCreation}
           />
         )}
-      </div>
-      {/* tax field  */}
-      <div className="flex flex-wrap gap-4 justify-center mt-10">
-        {/* Tax Rate */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="taxRate"
-          >
-            Tax Rate (%)
-          </label>
-          <input
-            type="number"
-            name="taxRate"
-            id="taxRate"
-            value={purchaseData.taxRate || ""}
-            onChange={(e) =>
-              setPurchaseData((prevData) => ({
-                ...prevData,
-                taxRate: e.target.value,
-              }))
-            }
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-          />
-        </div>
-
-        {/* Tax Amount */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="taxAmount"
-          >
-            Tax Amount
-          </label>
-          <input
-            type="number"
-            name="taxAmount"
-            id="taxAmount"
-            value={purchaseData.taxAmount || ""}
-            readOnly
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-          />
-        </div>
-
-        {/* Subtotal */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="subTotal"
-          >
-            Subtotal
-          </label>
-          <input
-            type="number"
-            name="subTotal"
-            id="subTotal"
-            value={purchaseData.subTotal || ""}
-            readOnly
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-          />
-        </div>
-
-        {/* Total */}
-        <div className="flex-1 min-w-[200px]">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-            htmlFor="total"
-          >
-            Total
-          </label>
-          <input
-            type="number"
-            name="total"
-            id="total"
-            value={purchaseData.total || ""}
-            readOnly
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
-          />
-        </div>
-      </div>
-      {/* Tax Ledger dummy */}
-
-      <div className="space-y-4 md:space-y-6 mt-10">
-        <div className="flex flex-wrap gap-4 justify-center">
-          {/* Tax Ledger */}
-
-          {/* Conditional rendering for Tax and Credit Ledgers */}
-          {debitNote.debitLedgers?.[0] && (
-            <>
-              {/* Tax Ledger */}
-              <div className="relative flex-1 min-w-[200px]">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-                  htmlFor="taxLedger"
-                >
-                  Tax in Purchase
-                </label>
-                <input
-                  type="text"
-                  name="taxLedger"
-                  id="taxLedger"
-                  value={
-                    debitNote.debitLedgers[1]?.ledgerName // If index 1 exists, use it for tax
-                      ? debitNote.debitLedgers[0].ledgerName
-                      : "No tax rate defined" // Otherwise, display dummy text for tax
-                  }
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200`}
-                  readOnly
-                />
-              </div>
-
-              {/*Debit  Ledger */}
-              <div className="relative flex-1 min-w-[200px]">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-                  htmlFor="creditLedger"
-                >
-                  Debit in Purchase Ledger
-                </label>
-                <input
-                  type="text"
-                  name="creditLedger"
-                  id="creditLedger"
-                  value={
-                    debitNote.debitLedgers[1]?.ledgerName || // If index 1 exists, use it for credit ledger
-                    debitNote.debitLedgers[0]?.ledgerName || // If only index 0 exists, use it as credit ledger
-                    "No credit ledger" // Fallback dummy text
-                  }
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200`}
-                  readOnly
-                />
-              </div>
-            </>
-          )}
-
-          {/*   Credit Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="creditLedger"
-            >
-              Credit in purchase Ledger
-            </label>
-            <input
-              type="text"
-              name="creditLedger"
-              id="creditLedger"
-              value={
-                debitNote.creditLedgers?.[0]?.ledgerName ||
-                "Please fill in the Debit Ledger"
-              }
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
-                !debitNote.creditLedgers?.[0]?.ledgerName
-                  ? "text-red-500"
-                  : "text-gray-700"
-              }`}
-              readOnly
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Tax Ledger */}
-      <div className="space-y-4 md:space-y-6 mt-10">
-        <div className="flex flex-wrap gap-4 justify-center">
-          {/* Tax Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="taxLedger"
-            >
-              Tax Ledger
-            </label>
-            <input
-              type="text"
-              name="taxLedger"
-              id="taxLedger"
-              value={taxDropdownState.searchTerm}
-              onClick={() =>
-                setTaxDropdownState((prevState) => ({
-                  ...prevState,
-                  isDropdownOpen: !prevState.isDropdownOpen,
-                }))
-              }
-              onChange={(e) =>
-                setTaxDropdownState((prevState) => ({
-                  ...prevState,
-                  searchTerm: e.target.value,
-                }))
-              }
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            {taxDropdownState.isDropdownOpen && (
-              <div
-                ref={taxDropdownRef}
-                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
-              >
-                <ul className="max-h-40 overflow-auto">
-                  {filteredTaxData(taxDropdownState.searchTerm).length > 0 ? (
-                    filteredTaxData(taxDropdownState.searchTerm).map(
-                      (option) => (
-                        <li
-                          key={option._id}
-                          onClick={() => {
-                            handleTaxSelect(option);
-                            setTaxDropdownState((prevState) => ({
-                              ...prevState,
-                              isDropdownOpen: false, // Close dropdown after selection
-                            }));
-                          }}
-                          className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          {option.name}
-                        </li>
-                      )
-                    )
-                  ) : (
-                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
-                      No data
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Debit Ledger */}
-          {/* Debit Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="debitLedger"
-            >
-              Debit Ledger
-            </label>
-            <input
-              type="text"
-              name="debitLedger"
-              id="debitLedger"
-              value={searchTermDebit}
-              onClick={() =>
-                setIsDropdownOpen((prevState) => ({
-                  ...prevState,
-                  debit: !prevState.debit,
-                }))
-              }
-              onChange={(e) => setSearchTermDebit(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            {isDropdownOpen.debit && (
-              <div
-                ref={dropdownRefs.debit}
-                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
-              >
-                <ul className="max-h-40 overflow-auto">
-                  {filteredLedgerData(searchTermDebit).length > 0 ? (
-                    filteredLedgerData(searchTermDebit).map((option) => (
-                      <li
-                        key={option._id}
-                        onClick={() => {
-                          handleLedgerSelect("debit", option);
-                          setIsDropdownOpen((prevState) => ({
-                            ...prevState,
-                            debit: false, // Close dropdown after selection
-                          }));
-                        }}
-                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        {option.name}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
-                      No data
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Credit Ledger */}
-          <div className="relative flex-1 min-w-[200px]">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
-              htmlFor="creditLedger"
-            >
-              Credit Ledger
-            </label>
-            <input
-              type="text"
-              name="creditLedger"
-              id="creditLedger"
-              value={searchTermCredit}
-              onClick={() =>
-                setIsDropdownOpen((prevState) => ({
-                  ...prevState,
-                  credit: !prevState.credit,
-                }))
-              }
-              onChange={(e) => setSearchTermCredit(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
-            {isDropdownOpen.credit && (
-              <div
-                ref={dropdownRefs.credit}
-                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
-              >
-                <ul className="max-h-40 overflow-auto">
-                  {filteredLedgerData(searchTermCredit).length > 0 ? (
-                    filteredLedgerData(searchTermCredit).map((option) => (
-                      <li
-                        key={option._id}
-                        onClick={() => {
-                          handleLedgerSelect("credit", option);
-                          setIsDropdownOpen((prevState) => ({
-                            ...prevState,
-                            credit: false, // Close dropdown after selection
-                          }));
-                        }}
-                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        {option.name}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
-                      No data
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      {/* Submit Button */}
-      <div className="my-10">
         <button
           type="button"
           onClick={handleSaveAndSubmit}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useGetExpensesQuery } from "../store/api/ExpenseExpenseApi";
 import { useGetAllExpenseQuery } from "../store/api/P&L";
 import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 // Helper function to calculate ledger balance
 const calculateLedgerBalance = (ledgers, transactions, ledgerId) => {
   const ledger = ledgers.find((ledger) => ledger._id === ledgerId);
@@ -79,6 +79,7 @@ const BalanceSheet = () => {
     totalDirectExpense = 0,
     totalDirectIncome = 0,
     totalIndirectExpense = 0,
+    totalIndirectExpenseTax = 0,
     totalIndirectIncome = 0,
     totalPurchaseAmount = 0,
     totalPurchaseReturn = 0,
@@ -94,7 +95,8 @@ const BalanceSheet = () => {
     totalPurchaseAmount -
     totalPurchaseTax -
     (totalPurchaseReturn - totalPurchaseReturnTax) +
-    totalDirectExpense;
+    totalDirectExpense -
+    totalIndirectExpenseTax;
   const totalSales =
     totalSalesAmount -
     totalSalesTax -
@@ -297,10 +299,12 @@ const BalanceSheet = () => {
             ) : null}
 
             {netLossDisplay > 0 ? (
-              <li className="flex justify-between py-1 font-medium">
-                <span>Net Loss:</span>
-                <span>{netLossDisplay.toFixed(2)}</span>
-              </li>
+              <Link to="/admin/profitandloss">
+                <li className="flex justify-between py-1 font-medium">
+                  <span>Net Loss:</span>
+                  <span>{netLossDisplay.toFixed(2)}</span>
+                </li>
+              </Link>
             ) : null}
 
             {balanceDifference > 0 ? (
@@ -350,10 +354,12 @@ const BalanceSheet = () => {
               </li>
             ) : null}
             {netProfitDisplay > 0 ? (
-              <li className="flex justify-between py-1 font-medium">
-                <span>Net Profit:</span>
-                <span>{netProfitDisplay.toFixed(2)}</span>
-              </li>
+              <Link to="/admin/profitandloss">
+                <li className="flex justify-between py-1 font-medium">
+                  <span>Net Profit:</span>
+                  <span>{netProfitDisplay.toFixed(2)}</span>
+                </li>
+              </Link>
             ) : null}
             {balanceDifference < 0 ? (
               <li className="flex justify-between py-1 font-medium">

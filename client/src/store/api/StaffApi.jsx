@@ -40,11 +40,10 @@ export const staffApi = createApi({
         body: formDataToSubmit,
       }),
     }),
-    // Endpoint to update an employee by ID
     updateEmployeeById: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/employees/${id}`,
-        method: "PATCH",
+        url: `employees/${id}`, // adjust the endpoint as per your setup
+        method: "PUT",
         body: data,
       }),
     }),

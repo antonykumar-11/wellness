@@ -46,7 +46,7 @@ export const purchaseApi = createApi({
       query: () => "purchases",
     }),
     getPurchasesSome: builder.query({
-      query: () => "purchases/some",
+      query: () => `purchases/some`,
     }),
     getPurchaseById: builder.query({
       query: (id) => {

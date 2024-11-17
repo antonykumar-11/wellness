@@ -4,7 +4,7 @@ export const taxApi = createApi({
   reducerPath: "taxApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/employeegroups `,
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/employeegroups`,
     prepareHeaders: (headers, { getState }) => {
       const state = getState();
       const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources
@@ -53,48 +53,3 @@ export const {
   useUpdateTaxMutation,
   useDeleteTaxMutation,
 } = taxApi;
-
-// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-// export const taxApi = createApi({
-//   reducerPath: "taxApi",
-//   baseQuery: fetchBaseQuery({
-//     baseUrl: "http://localhost:8000/api/vi/client/taxRoutes/",
-//   }),
-//   endpoints: (builder) => ({
-//     createTax: builder.mutation({
-//       query: (newTax) => ({
-//         url: "taxes",
-//         method: "POST",
-//         body: newTax,
-//       }),
-//     }),
-//     getTaxes: builder.query({
-//       query: () => "taxes",
-//     }),
-//     getTaxById: builder.query({
-//       query: (id) => `taxes/${id}`,
-//     }),
-//     updateTax: builder.mutation({
-//       query: ({ id, updatedTax }) => ({
-//         url: `taxes/${id}`,
-//         method: "PUT",
-//         body: updatedTax,
-//       }),
-//     }),
-//     deleteTax: builder.mutation({
-//       query: (id) => ({
-//         url: `taxes/${id}`,
-//         method: "DELETE",
-//       }),
-//     }),
-//   }),
-// });
-
-// export const {
-//   useCreateTaxMutation,
-//   useGetTaxesQuery,
-//   useGetTaxByIdQuery,
-//   useUpdateTaxMutation,
-//   useDeleteTaxMutation,
-// } = taxApi;

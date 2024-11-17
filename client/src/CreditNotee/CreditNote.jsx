@@ -220,9 +220,7 @@ const CreditNote = () => {
         setPurchaseData((prevData) => ({
           ...filteredVoucher,
           voucherType: "Purchase Voucher", // Automatically set voucherType to "Payment Voucher"
-          creditDueDate: new Date(filteredVoucher.creditDueDate)
-            .toISOString()
-            .split("T")[0],
+
           transactionDate: new Date(filteredVoucher.transactionDate)
             .toISOString()
             .split("T")[0],
@@ -271,9 +269,7 @@ const CreditNote = () => {
           ...prevData, // Preserve the existing state data
           ...filteredVoucher, // Merge the voucher data
           voucherType: "Credit Note", // Automatically set voucherType to "Credit Note"
-          creditDueDate: new Date(filteredVoucher.creditDueDate)
-            .toISOString()
-            .split("T")[0], // Format creditDueDate to "YYYY-MM-DD"
+          // Format creditDueDate to "YYYY-MM-DD"
           transactionDate: new Date(filteredVoucher.transactionDate)
             .toISOString()
             .split("T")[0], // Format transactionDate to "YYYY-MM-DD"
@@ -776,18 +772,6 @@ const CreditNote = () => {
           {/* Row 2 */}
 
           {/* Row 3 */}
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Authorized By Name
-            </label>
-            <input
-              type="text"
-              name="authorizedBy.name"
-              value={purchaseData.authorizedBy.name}
-              onChange={handleChange}
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
 
           {/* Row 4 */}
           {/* Row 4 - Purchased By */}
@@ -870,19 +854,6 @@ const CreditNote = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={purchaseData.description}
-              onChange={handleChange}
-              rows="4"
-              className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
           </div>
         </div>
       </form>

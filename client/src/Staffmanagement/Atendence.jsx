@@ -498,7 +498,15 @@ const AttendanceList = () => {
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
+  const [askHelp, setAskHelp] = useState(false); // State to manage modal visibility
 
+  const openModalAsk = () => {
+    setAskHelp(true); // Function to open the modal
+  };
+
+  const closeModalAsk = () => {
+    setAskHelp(false); // Function to close the modal
+  };
   const handleCheckboxChange = async (entityId, day, checked) => {
     const dateStr = `${selectedYear}-${(selectedMonth + 1)
       .toString()
@@ -726,9 +734,66 @@ const AttendanceList = () => {
           onChange={handleYearChange}
           className="border border-gray-300 p-2 dark:bg-gray-700 dark:text-white"
         />
+        <button
+          onClick={openModalAsk} // On button click, open the modal
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2"
+        >
+          Any Help
+        </button>
       </div>
       {filteredEntities &&
         filteredEntities.map((entity) => renderTable(entity))}
+
+      {askHelp && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70 overflow-y-auto">
+          <div className="bg-white lg:mr-24 rounded-lg p-6 md:p-8 max-w-lg md:max-w-6xl mx-auto relative shadow-lg border border-blue-300">
+            <button
+              onClick={closeModalAsk} // Close modal when "Thank You" is clicked
+              className="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+            >
+              Thank You
+            </button>
+            <h2 className="text-xl font-bold text-center mb-4 text-blue-600 tracking-wide">
+              Information Guide
+            </h2>
+            <div className="overflow-y-auto max-h-[70vh]">
+              {" "}
+              {/* Limit height for scrolling */}
+              <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                <span className="font-semibold">1 :</span>
+                ഇവിടെ ഒരു ജോലിക്കാരന്റെ ശമ്പളം ദിവസേന അയാൾ ചെയുന്ന ജോലിക്കു
+                കൊടുക്കുന്നെങ്കിൽ ഡ്യൂട്ടി ഹോഴ്സ് ( Enter duty hours ) മാത്രം
+                ക്ലിക്ക് ( click) ചെയുകയും മറ്റൊന്നും കൊടുക്കാതെ ഓക്കേ ( ok)
+                കൊടുത്തു പോകുക . അപ്പോൾ ആ ജോലിക്കാരാണ് അത് ഒരു ദിവസത്തെ ഹാജർ ആയി
+                മാറും .
+              </p>
+              <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                <span className="font-semibold">2 :</span>
+                ഇവിടെ ഒരു ജോലിക്കാരന്റെ ഓവർടൈം ( Over Time) ദിവസേന അയാൾ ചെയുന്ന
+                ജോലിക്കു കൊടുക്കുന്നെങ്കിൽ ഓവർടൈം ( Enter overtime hours )
+                ക്ലിക്ക് ചെയുകയും എത്ര മണിക്കൂർ ഓവർടൈം ( over time) ചെയ്‌തെന്നും
+                പറഞ്ഞു കൊടുക്കണം
+              </p>
+              <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                <span className="font-semibold">3 :</span> ഇവിടെ ഒരു
+                ജോലിക്കാരന്റെ ശമ്പളം അയാൾ ചെയുന്ന ജോലിയുടെ മണിക്കൂർ ( Enter duty
+                hours ) കൊടുക്കുന്നെങ്കിൽ എത്ര മണിക്കൂർ ജോലി ചെയ്തെന്നു
+                മണിക്കൂറിൽ പറഞ്ഞു കൊടുക്കണം മറ്റൊന്നും കൊടുക്കാതെ ഓക്കേ കൊടുത്തു
+                പോകുക . അപ്പോൾ ആ ജോലിക്കാരാണ് അത് ഒരു ദിവസത്തെ അല്ലെങ്കിൽ
+                മാസത്തെ ഹാജർ ആയി മാറും
+              </p>
+              <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                <span className="font-semibold">4:</span>
+                ഇവിടെ ഒരു ജോലിക്കാരന്റെ ശമ്പളം അയാൾ ചെയുന്ന ജോലിയുടെ ദിവസം
+                നോക്കി കൊടുക്കുന്നെങ്കിൽ എത്ര ദിവസം ജോലി ചെയ്തെന്നു ദിവസത്തിൽ (
+                Enter total days worked) പറഞ്ഞു കൊടുക്കണം മറ്റൊന്നും കൊടുക്കാതെ
+                ഓക്കേ കൊടുത്തു പോകുക . അപ്പോൾ ആ ജോലിക്കാരാണ് അത് ഒരു ദിവസത്തെ
+                അല്ലെങ്കിൽ മാസത്തെ ഹാജർ ആയി മാറും
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <ToastContainer />
     </div>
   );

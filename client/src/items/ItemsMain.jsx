@@ -4,14 +4,17 @@ import Invoice from "../invoice/Invoice";
 
 const InvoiceContainer = () => {
   const {
-    data: invoices,
+    data: invoicesResponse,
     error,
     isLoading,
     refetch,
   } = useGetAllInvoicesQuery();
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
-  const invoiceList = invoices?.data || [];
+  // Correctly access the invoices and sales arrays
+  const invoiceList1 = invoicesResponse?.data || [];
+  const invoiceList = invoicesResponse?.data?.invoices || [];
+  const salesList = invoicesResponse?.data?.sales || [];
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   useEffect(() => {
     if (selectedInvoice) {
@@ -28,13 +31,35 @@ const InvoiceContainer = () => {
   };
 
   const calculateTotal = (items) => {
-    const subtotal = items.reduce(
-      (acc, item) => acc + Number(item.price) * item.qty,
-      0
-    );
-    const cgst = subtotal * 0.09;
-    const sgst = subtotal * 0.09;
-    return subtotal + cgst + sgst;
+    // Step 1: Initialize subtotal
+    let subtotal = 0;
+
+    // Step 2: Calculate subtotal
+    items.forEach((item) => {
+      const rate = Number(item.rate);
+      const quantity = Number(item.quantity) || 1; // Treat null or undefined as 0
+      subtotal += rate * quantity; // Accumulate the subtotal
+    });
+
+    // Log the calculated subtotal
+
+    // Step 3: Store the subtotal for reference
+    const subtotalValue = subtotal;
+
+    // Step 4: Assuming all items have the same tax rate, use the first item's taxRate
+    const taxRate = items.length > 0 ? Number(items[0].taxRate) : 0;
+
+    // Step 5: Calculate CGST and SGST amounts
+    const cgst = (subtotalValue * (taxRate / 2)) / 100; // CGST amount
+    const sgst = (subtotalValue * (taxRate / 2)) / 100; // SGST amount
+
+    // Step 6: Calculate the final total
+    const total = subtotalValue + cgst + sgst;
+
+    // Log the final total
+
+    // Step 7: Return the final total
+    return total;
   };
 
   return (
@@ -63,12 +88,25 @@ const InvoiceContainer = () => {
               </tr>
             </thead>
             <tbody>
-              {invoiceList.map((invoice) => (
+              {salesList.map((invoice) => (
                 <tr key={invoice._id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b">{invoice.invoiceNo}</td>
-                  <td className="py-2 px-4 border-b">{invoice.companyName}</td>
                   <td className="py-2 px-4 border-b">
-                    {formatDate(invoice.date)}
+                    {invoice.saleInvoiceNumber}
+                  </td>
+                  {invoiceList.length > 0 ? (
+                    invoiceList.map((invoice) => (
+                      <td key={invoice._id} className="py-2 px-4 border-b">
+                        {invoice.companyName}
+                      </td>
+                    ))
+                  ) : (
+                    <td colSpan={1} className="py-2 px-4 border-b text-center">
+                      No invoices found.
+                    </td>
+                  )}
+
+                  <td className="py-2 px-4 border-b">
+                    {formatDate(invoice.transactionDate)}
                   </td>
                   <td className="py-2 px-4 border-b">
                     {calculateTotal(invoice.items).toFixed(2)}

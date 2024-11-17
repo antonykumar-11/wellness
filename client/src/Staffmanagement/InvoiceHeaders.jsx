@@ -61,6 +61,12 @@ function InvoiceHeader() {
         >
           debitnote
         </NavLink>
+        <NavLink
+          to="/vouchers/indirectdebitnote"
+          className="px-1 py-1 no-underline rounded hover:text-white hover:bg-black dark:hover:bg-gradient-to-r from-green-400 to-blue-500"
+        >
+          Indirect Debit Note
+        </NavLink>
       </div>
     </div>
   );

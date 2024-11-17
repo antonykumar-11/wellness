@@ -20,6 +20,9 @@ export const journalVoucherApi = createApi({
     getAllJournalVouchers: builder.query({
       query: () => "journal-vouchers",
     }),
+    checkVoucherNumber: builder.query({
+      query: () => "journal-vouchers/check",
+    }),
     getJournalVoucherById: builder.query({
       query: (id) => `journal-vouchers/${id}`,
     }),
@@ -47,6 +50,7 @@ export const journalVoucherApi = createApi({
 });
 
 export const {
+  useCheckVoucherNumberQuery,
   useGetAllJournalVouchersQuery,
   useGetJournalVoucherByIdQuery,
   useCreateJournalVoucherMutation,

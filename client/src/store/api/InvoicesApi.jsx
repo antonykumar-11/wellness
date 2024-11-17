@@ -3,7 +3,17 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const invoicesApi = createApi({
   reducerPath: "iinvoicesApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Correct usage of fetchBaseQuery
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
+    prepareHeaders: (headers, { getState }) => {
+      const state = getState();
+      const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources
+      console.log("token", token);
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
+      return headers;
+    },
   }),
   endpoints: (builder) => ({
     getAllInvoices: builder.query({

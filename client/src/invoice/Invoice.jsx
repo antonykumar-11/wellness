@@ -1,253 +1,3 @@
-// import React, { useRef } from "react";
-// import { PDFDownloadLink } from "@react-pdf/renderer";
-// import InvoicePDF from "./InvoicePdf"; // Import your InvoicePDF component
-// import { useNavigate } from "react-router-dom";
-// import { useDeleteInvoiceMutation } from "../store/api/InvoicesApi"; // Adjust the path as needed
-// import convertNumberToWords from "./convertNumberToWords";
-// import Image from "../assets/logo.png";
-// const Invoice = ({ data }) => {
-//   const componentRef = useRef();
-//   const subtotal = data.items.reduce(
-//     (acc, item) => acc + Number(item.price) * item.qty,
-//     0
-//   );
-//   const cgst = subtotal * 0.09;
-//   const sgst = subtotal * 0.09;
-//   const total = subtotal + cgst + sgst;
-//   const navigate = useNavigate();
-//   const [deleteInvoice] = useDeleteInvoiceMutation(); // RTK Query hook for deleting invoice
-
-//   const handleEdit = () => {
-//     navigate(`/invoice/invoice/edit/${data._id}`); // Navigate to the edit page
-//   };
-
-//   const handleDelete = async () => {
-//     try {
-//       await deleteInvoice(data._id).unwrap(); // Delete invoice and wait for completion
-//       navigate("/invoice/invoice-preview"); // Redirect after successful delete
-//     } catch (error) {
-//       console.error("Failed to delete invoice: ", error);
-//       // Optionally handle the error, e.g., show a message to the user
-//     }
-//   };
-
-//   return (
-//     <div className="p-4">
-//       <div
-//         ref={componentRef}
-//         className="max-w-4xl mx-auto bg-white p-8 shadow-lg rounded-lg"
-//       >
-//         {/* Invoice Header */}
-//         <div
-//           className="relative flex items-center justify-center mb-4"
-//           style={{ position: "relative" }}
-//         >
-//           <div className="text-center">
-//             <h1 className="text-3xl font-bold text-gray-800 uppercase">
-//               {data.companyName}
-//             </h1>
-//             <p className="text-lg text-gray-600">{data.companyTagline}</p>
-//           </div>
-//           <img
-//             src={Image}
-//             alt="Company Logo"
-//             className="absolute right-0 top-1/2 transform -translate-y-1/2 w-64 h-64 rounded-full object-contain"
-//             style={{ marginRight: "-4rem" }}
-//           />
-//         </div>
-
-//         {/* Company and Invoice Details */}
-//         <div className="text-right mb-6">
-//           <p className="text-base text-gray-600">{data.companyAddress.line1}</p>
-//           <p className="text-base text-gray-600">{data.companyAddress.line2}</p>
-//           <p className="text-base text-gray-600">{data.companyAddress.line3}</p>
-//           <p className="text-base text-gray-600">{data.companyAddress.line4}</p>
-//           <p className="text-base text-gray-600">{data.companyAddress.line5}</p>
-//         </div>
-
-//         <h2 className="text-center mb-8 text-2xl font-semibold">Tax Invoice</h2>
-
-//         <div className="flex justify-between mb-8">
-//           <div>
-//             <p className="text-base text-gray-600">PAN NO: {data.panNo}</p>
-//             <p className="text-base text-gray-600">GST NO: {data.gstNo}</p>
-//           </div>
-//           <div>
-//             <p className="text-base text-gray-600">
-//               INVOICE NO: {data.invoiceNo}
-//             </p>
-//             <p className="text-base text-gray-600">DATE: {data.date}</p>
-//           </div>
-//         </div>
-
-//         {/* Billed and Shipped To Addresses */}
-//         <div className="mb-8">
-//           <div className="flex justify-between">
-//             <div>
-//               <h2 className="text-lg font-semibold text-gray-600">
-//                 Billed To:
-//               </h2>
-//               <div className="text-base text-gray-600">
-//                 <p>{data.billedTo.line1}</p>
-//                 <p>{data.billedTo.line2}</p>
-//                 <p>{data.billedTo.line3}</p>
-//                 <p>{data.billedTo.line4}</p>
-//                 <p>{data.billedTo.line5}</p>
-//               </div>
-//             </div>
-//             <div className="text-right">
-//               <h2 className="text-lg font-semibold text-gray-600">
-//                 Shipped To:
-//               </h2>
-//               <div className="text-base text-gray-600">
-//                 <p>{data.shippedTo.line1}</p>
-//                 <p>{data.shippedTo.line2}</p>
-//                 <p>{data.shippedTo.line3}</p>
-//                 <p>{data.shippedTo.line4}</p>
-//                 <p>{data.shippedTo.line5}</p>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Invoice Items */}
-//         <div className="mb-8">
-//           <table className="w-full border-collapse border border-gray-300">
-//             <thead>
-//               <tr className="bg-gray-200">
-//                 <th className="border px-4 py-2 text-left text-sm">Sl No.</th>
-//                 <th className="border px-4 py-2 text-left text-sm">
-//                   Description
-//                 </th>
-//                 <th className="border px-4 py-2 text-left text-sm">HSN Code</th>
-//                 <th className="border px-4 py-2 text-left text-sm">Unit</th>
-//                 <th className="border px-4 py-2 text-left text-sm">Qty</th>
-//                 <th className="border px-4 py-2 text-left text-sm">
-//                   Rate Price
-//                 </th>
-//                 <th className="border px-4 py-2 text-left text-sm">Total</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {data.items.map((item, index) => (
-//                 <tr key={index}>
-//                   <td className="border px-4 py-2 text-left text-sm">
-//                     {item.SerialNumber}
-//                   </td>
-//                   <td className="border px-4 py-2 text-left text-sm">
-//                     {item.description}
-//                   </td>
-//                   <td className="border px-4 py-2 text-left text-sm">
-//                     {item.hsnCode}
-//                   </td>
-//                   <td className="border px-4 py-2 text-left text-sm">
-//                     {item.unit}
-//                   </td>
-//                   <td className="border px-4 py-2 text-center text-sm">
-//                     {item.qty}
-//                   </td>
-//                   <td className="border px-4 py-2 text-right text-sm">
-//                     {Number(item.price).toFixed(2)}
-//                   </td>
-//                   <td className="border px-4 py-2 text-right text-sm">
-//                     {(Number(item.price) * item.qty).toFixed(2)}
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-
-//         {/* Total and Amount in Words */}
-//         <div className="flex justify-end mb-8">
-//           <div className="text-right">
-//             <p className="text-base text-gray-600">
-//               Subtotal: ₹{subtotal.toFixed(2)}
-//             </p>
-//             <p className="text-base text-gray-600">
-//               Add CGST @9%: ₹{cgst.toFixed(2)}
-//             </p>
-//             <p className="text-base text-gray-600">
-//               Add SGST @9%: ₹{sgst.toFixed(2)}
-//             </p>
-//             <p className="text-2xl font-bold text-gray-800">
-//               Total: ₹{total.toFixed(2)}
-//             </p>
-//           </div>
-//         </div>
-//         <div className="mb-8">
-//           <p className="text-base text-gray-600">
-//             Amount in Words: {convertNumberToWords(total)}
-//           </p>
-//         </div>
-
-//         {/* Bank Details and Declaration */}
-//         <div className="mb-8">
-//           <h2 className="text-lg font-semibold text-gray-600 mb-2">
-//             Bank Details:
-//           </h2>
-//           <p className="text-base text-gray-600">{data.bankDetails.name}</p>
-//           <p className="text-base text-gray-600">
-//             Account Number: {data.bankDetails.accountNumber}
-//           </p>
-//           <p className="text-base text-gray-600">
-//             IFSC Code: {data.bankDetails.ifsc}
-//           </p>
-//           <p className="text-base text-gray-600">
-//             Branch: {data.bankDetails.branch}
-//           </p>
-//         </div>
-//         <div className="mb-8">
-//           <p className="text-base text-gray-600 text-[16px]">
-//             {data.declaration}
-//           </p>
-//         </div>
-//         <div className="text-right">
-//           <p className="text-base text-gray-600 mb-2">For {data.companyName}</p>
-//           <p className="text-base text-gray-600">Authorized Signatory</p>
-//         </div>
-//       </div>
-
-//       {/* PDF Download Button */}
-//       <div className="flex justify-center mt-8">
-//         <PDFDownloadLink
-//           document={<InvoicePDF data={data} />}
-//           fileName="invoice.pdf"
-//         >
-//           {({ loading }) =>
-//             loading ? (
-//               <button className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">
-//                 Loading document...
-//               </button>
-//             ) : (
-//               <button className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600">
-//                 Download PDF
-//               </button>
-//             )
-//           }
-//         </PDFDownloadLink>
-//       </div>
-
-//       {/* Action Buttons */}
-//       <div className="flex justify-between mt-8">
-//         <button
-//           onClick={handleEdit}
-//           className="bg-yellow-500 text-white px-4 py-2 rounded shadow hover:bg-yellow-600"
-//         >
-//           Edit
-//         </button>
-//         <button
-//           onClick={handleDelete}
-//           className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600"
-//         >
-//           Delete
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Invoice;
 import React, { useRef } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import InvoicePDF from "./InvoicePdf"; // Import your InvoicePDF component
@@ -255,17 +5,35 @@ import { useNavigate } from "react-router-dom";
 import { useDeleteInvoiceMutation } from "../store/api/InvoicesApi"; // Adjust the path as needed
 import convertNumberToWords from "./convertNumberToWords";
 import Image from "../assets/logo.png";
-
+import { useGetAllInvoicesQuery } from "../store/api/InvoicesApi";
 const Invoice = ({ data }) => {
   const componentRef = useRef();
-  const subtotal = data.items.reduce(
-    (acc, item) => acc + Number(item.price) * item.qty,
-    0
-  );
-  const cgst = subtotal * 0.09;
-  const sgst = subtotal * 0.09;
-  const total = subtotal + cgst + sgst;
-  const navigate = useNavigate();
+  const { data: invoicesResponse, isLoading } = useGetAllInvoicesQuery();
+  const invoiceList = invoicesResponse?.data?.invoices || [];
+  const calculateTotal = (itemGroups) => {
+    let totalSubtotal = 0;
+    let totalCGST = 0;
+    let totalSGST = 0;
+    const taxRate = itemGroups[0]?.[0]?.taxRate || 0;
+
+    itemGroups.forEach((items) => {
+      const subtotal = items.reduce(
+        (acc, item) => acc + Number(item.rate) * (item.quantity || 1),
+        0
+      );
+      const cgst = (subtotal * (taxRate / 2)) / 100;
+      const sgst = (subtotal * (taxRate / 2)) / 100;
+
+      totalSubtotal += subtotal;
+      totalCGST += cgst;
+      totalSGST += sgst;
+    });
+
+    const overallTotal = totalSubtotal + totalCGST + totalSGST;
+    return { totalSubtotal, totalCGST, totalSGST, overallTotal, taxRate };
+  };
+  const { totalSubtotal, totalCGST, totalSGST, overallTotal, taxRate } =
+    calculateTotal([data.items]);
   const [deleteInvoice] = useDeleteInvoiceMutation(); // RTK Query hook for deleting invoice
 
   const handleEdit = () => {
@@ -288,45 +56,73 @@ const Invoice = ({ data }) => {
         ref={componentRef}
         className="max-w-4xl mx-auto bg-white p-10 shadow-md rounded-lg"
       >
-        {/* Invoice Header */}
-        <div className="relative mb-8 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 uppercase">
-              {data.companyName}
-            </h1>
-            <p className="text-lg text-gray-600">{data.companyTagline}</p>
-          </div>
-          <img
-            src={Image}
-            alt="Company Logo"
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 w-32 h-32 rounded-full object-contain"
-            style={{ marginRight: "-4rem" }}
-          />
-        </div>
+        {invoiceList.length > 0 ? (
+          invoiceList.map((invoice, index) => (
+            <div key={index}>
+              {/* Invoice Header */}
+              <div className="relative mb-8 flex items-center justify-center">
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold text-gray-800 uppercase">
+                    {invoice.companyName || "Company Name"}
+                  </h1>
+                  <p className="text-lg text-gray-600">
+                    {invoice.companyTagline || "Company Tagline"}
+                  </p>
+                </div>
+                <img
+                  src={invoice.logo || Image}
+                  alt="Company Logo"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 w-32 h-32 rounded-full object-contain"
+                  style={{ marginRight: "-4rem" }}
+                />
+              </div>
 
-        {/* Company and Invoice Details */}
-        <div className="text-right mb-10">
-          <p className="text-base text-gray-600">{data.companyAddress.line1}</p>
-          <p className="text-base text-gray-600">{data.companyAddress.line2}</p>
-          <p className="text-base text-gray-600">{data.companyAddress.line3}</p>
-          <p className="text-base text-gray-600">{data.companyAddress.line4}</p>
-          <p className="text-base text-gray-600">{data.companyAddress.line5}</p>
-        </div>
+              {/* Company and Invoice Details */}
+              <div className="text-right mb-10">
+                <>
+                  <p className="text-base text-gray-600">{invoice.address1}</p>
+                  <p className="text-base text-gray-600">{invoice.address2}</p>
+                  <p className="text-base text-gray-600">{invoice.address3}</p>
+                  <p className="text-base text-gray-600">{invoice.address4}</p>
+                  <p className="text-base text-gray-600">
+                    Email : {invoice.email}
+                  </p>
+                  <p className="text-base text-gray-600">
+                    GST No : {invoice.gstNumber}
+                  </p>
+                  <p className="text-base text-gray-600">
+                    GST No : {invoice.mobileNumber}
+                  </p>
+                </>
+              </div>
 
-        <h2 className="text-center mb-8 text-2xl font-semibold">Tax Invoice</h2>
+              <h2 className="text-center mb-8 text-2xl font-semibold">
+                Tax Invoice
+              </h2>
 
-        <div className="flex justify-between mb-10">
-          <div>
-            <p className="text-base text-gray-600">PAN NO: {data.panNo}</p>
-            <p className="text-base text-gray-600">GST NO: {data.gstNo}</p>
-          </div>
-          <div>
-            <p className="text-base text-gray-600">
-              INVOICE NO: {data.invoiceNo}
-            </p>
-            <p className="text-base text-gray-600">DATE: {data.date}</p>
-          </div>
-        </div>
+              <div className="flex justify-between mb-10">
+                <div>
+                  <p className="text-base text-gray-600">
+                    PAN NO: {invoice.panNo || "N/A"}
+                  </p>
+                  <p className="text-base text-gray-600">
+                    GST NO: {invoice.gstNo || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-base text-gray-600">
+                    INVOICE NO: {invoice.invoiceNo || "N/A"}
+                  </p>
+                  <p className="text-base text-gray-600">
+                    DATE: {invoice.date || "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-600">No invoices available.</p>
+        )}
 
         {/* Billed and Shipped To Addresses */}
         <div className="mb-10">
@@ -336,11 +132,16 @@ const Invoice = ({ data }) => {
                 Billed To:
               </h2>
               <div className="text-base text-gray-600">
-                <p>{data.billedTo.line1}</p>
-                <p>{data.billedTo.line2}</p>
-                <p>{data.billedTo.line3}</p>
-                <p>{data.billedTo.line4}</p>
-                <p>{data.billedTo.line5}</p>
+                <p>{data.purchasedBy.companyName}</p>
+                <p>{data.purchasedBy.street}</p>
+                <p>{data.purchasedBy.MainArea}</p>
+                <p>{data.purchasedBy.postOffice}</p>
+                <p>{data.purchasedBy.City}</p>
+                <p>{data.purchasedBy.State}</p>
+                <p>{data.purchasedBy.Country}</p>
+                <p>{data.purchasedBy.ZIPCode}</p>
+                <p>{data.purchasedBy.companyPanNumber}</p>
+                <p>{data.purchasedBy.gstNumber}</p>
               </div>
             </div>
             <div className="text-right">
@@ -348,11 +149,16 @@ const Invoice = ({ data }) => {
                 Shipped To:
               </h2>
               <div className="text-base text-gray-600">
-                <p>{data.shippedTo.line1}</p>
-                <p>{data.shippedTo.line2}</p>
-                <p>{data.shippedTo.line3}</p>
-                <p>{data.shippedTo.line4}</p>
-                <p>{data.shippedTo.line5}</p>
+                <p>{data.purchasedTo.companyName}</p>
+                <p>{data.purchasedTo.street}</p>
+                <p>{data.purchasedTo.MainArea}</p>
+                <p>{data.purchasedTo.postOffice}</p>
+                <p>{data.purchasedTo.City}</p>
+                <p>{data.purchasedTo.State}</p>
+                <p>{data.purchasedTo.Country}</p>
+                <p>{data.purchasedTo.ZIPCode}</p>
+                <p>{data.purchasedTo.companyPanNumber}</p>
+                <p>{data.purchasedTo.gstNumber}</p>
               </div>
             </div>
           </div>
@@ -367,7 +173,7 @@ const Invoice = ({ data }) => {
                   Sl No.
                 </th>
                 <th className="border px-4 py-2 text-left text-sm font-semibold">
-                  Description
+                  Item Of Description
                 </th>
                 <th className="border px-4 py-2 text-left text-sm font-semibold">
                   HSN Code
@@ -376,13 +182,10 @@ const Invoice = ({ data }) => {
                   Unit
                 </th>
                 <th className="border px-4 py-2 text-left text-sm font-semibold">
-                  Qty
+                  Rate
                 </th>
                 <th className="border px-4 py-2 text-left text-sm font-semibold">
-                  Rate Price
-                </th>
-                <th className="border px-4 py-2 text-left text-sm font-semibold">
-                  Total
+                  Amount
                 </th>
               </tr>
             </thead>
@@ -390,10 +193,10 @@ const Invoice = ({ data }) => {
               {data.items.map((item, index) => (
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="border px-4 py-2 text-left text-sm">
-                    {item.SerialNumber}
+                    {item.serialNumber}
                   </td>
                   <td className="border px-4 py-2 text-left text-sm">
-                    {item.description}
+                    {item.stockName}
                   </td>
                   <td className="border px-4 py-2 text-left text-sm">
                     {item.hsnCode}
@@ -402,13 +205,10 @@ const Invoice = ({ data }) => {
                     {item.unit}
                   </td>
                   <td className="border px-4 py-2 text-center text-sm">
-                    {item.qty}
+                    {item.actualrate}
                   </td>
                   <td className="border px-4 py-2 text-right text-sm">
-                    {Number(item.price).toFixed(2)}
-                  </td>
-                  <td className="border px-4 py-2 text-right text-sm">
-                    {(Number(item.price) * item.qty).toFixed(2)}
+                    {Number(item.rate).toFixed(2)}
                   </td>
                 </tr>
               ))}
@@ -420,77 +220,89 @@ const Invoice = ({ data }) => {
         <div className="flex justify-end mb-10">
           <div className="text-right">
             <p className="text-base text-gray-600 mb-1">
-              Subtotal: ₹{subtotal.toFixed(2)}
+              Subtotal: ₹{totalSubtotal.toFixed(2)}
             </p>
             <p className="text-base text-gray-600 mb-1">
-              Add CGST @9%: ₹{cgst.toFixed(2)}
+              Add CGST {taxRate / 2}: ₹{totalCGST.toFixed(2)}
             </p>
             <p className="text-base text-gray-600 mb-1">
-              Add SGST @9%: ₹{sgst.toFixed(2)}
+              Add SGST {taxRate / 2}: ₹{totalSGST.toFixed(2)}
             </p>
             <p className="text-2xl font-bold text-gray-800 mt-2">
-              Total: ₹{total.toFixed(2)}
+              Total: ₹{overallTotal.toFixed(2)}
             </p>
           </div>
         </div>
         <div className="mb-10">
           <p className="text-base text-gray-600">
-            Amount in Words: {convertNumberToWords(total)}
+            Amount in Words: {convertNumberToWords(overallTotal)}
           </p>
         </div>
 
         {/* Bank Details and Declaration */}
-        <div className="mb-10">
-          <h2 className="text-lg font-semibold text-gray-600 mb-2">
-            Bank Details:
-          </h2>
-          <p className="text-base text-gray-600">{data.bankDetails.name}</p>
-          <p className="text-base text-gray-600">
-            Account Number: {data.bankDetails.accountNumber}
-          </p>
-          <p className="text-base text-gray-600">
-            IFSC Code: {data.bankDetails.ifsc}
-          </p>
-          <p className="text-base text-gray-600">
-            Branch: {data.bankDetails.branch}
-          </p>
-        </div>
-        <div className="mb-10">
-          <p className="text-base text-gray-600 text-[16px]">
-            {data.declaration}
-          </p>
-        </div>
-        <div className="mb-10 text-right">
-          <p className="text-lg font-semibold text-gray-600">
-            For {data.companyName}
-          </p>
-          <p className="text-base text-gray-600">{data.director}</p>
-          <p className="text-base text-gray-600">Managing Director</p>
-        </div>
-      </div>
+        {invoiceList.length > 0 ? (
+          invoiceList.map((invoice, index) => (
+            <div key={index} className="mb-10">
+              <h2 className="text-lg font-semibold text-gray-600 mb-2">
+                Bank Details:
+              </h2>
+              <p className="text-base text-gray-600">
+                Account name: {invoice.bankName || "N/A"}
+              </p>
+              <p className="text-base text-gray-600">
+                Account Number: {invoice.accountNumber || "N/A"}
+              </p>
+              <p className="text-base text-gray-600">
+                IFSC Code: {invoice.ifsc || "N/A"}
+              </p>
+              <p className="text-base text-gray-600">
+                Branch: {invoice.branch || "N/A"}
+              </p>
 
+              <div className="mt-4">
+                <p className="text-base text-gray-600 text-[16px]">
+                  {invoice.description || "No description provided."}
+                </p>
+              </div>
+
+              <div className="mt-10 text-right">
+                <p className="text-lg font-semibold text-gray-600">
+                  For {invoice.companyName || "Company Name"}
+                </p>
+                <p className="text-base text-gray-600">
+                  {invoice.director || "Director"}
+                </p>
+                <p className="text-base text-gray-600">Managing Director</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-600">No invoices available.</p>
+        )}
+      </div>
       {/* Action Buttons */}
       <div className="flex justify-between mt-10">
-        <button
+        {/* <button
           onClick={handleEdit}
           className="bg-blue-600 text-white px-6 py-2 rounded shadow-md hover:bg-blue-700"
         >
           Edit
-        </button>
+        </button> */}
         <PDFDownloadLink
-          document={<InvoicePDF data={data} />}
+          document={<InvoicePDF invoiceList={invoiceList} data={data} />}
           fileName="invoice.pdf"
           className="bg-green-600 text-white px-6 py-2 rounded shadow-md hover:bg-green-700"
         >
           {({ loading }) => (loading ? "Loading document..." : "Download PDF")}
         </PDFDownloadLink>
-        <button
+        {/* <button
           onClick={handleDelete}
           className="bg-red-600 text-white px-6 py-2 rounded shadow-md hover:bg-red-700"
         >
           Delete
-        </button>
-      </div>
+        </button> */}
+      </div>{" "}
+      *
     </div>
   );
 };

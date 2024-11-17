@@ -46,6 +46,7 @@ export const ledgerApi = createApi({
         body: updatedPurchase,
       }),
     }),
+
     deleteLedger: builder.mutation({
       query: (id) => ({
         url: `ledgers/${id}`,

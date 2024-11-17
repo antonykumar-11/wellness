@@ -1,32 +1,29 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useGetReceiptVouchersQuery } from "../store/api/RecieptVoucher";
 import { useNavigate } from "react-router-dom";
 
-// Function to get the "Month Year" from the transactionDate
+// Function to get the "Month Year" from the date field
 const getMonthYear = (dateString) => {
   const date = new Date(dateString);
   if (isNaN(date)) return "Invalid Date"; // Handle invalid date
-
   const options = { year: "numeric", month: "long" }; // e.g., "September 2024"
   return date.toLocaleDateString("en-US", options);
 };
 
 const ReceiptReport = () => {
-  const [paymentData, setPaymentData] = React.useState({
-    thisPayment: "New payment", // Initial value matching dropdown
-  });
-
+  const [searchQuery, setSearchQuery] = useState("");
   const {
     data: payments,
     isLoading,
     isError,
     refetch,
-  } = useGetReceiptVouchersQuery(paymentData.thisPayment, {
-    skip: !paymentData.thisPayment,
-  });
+  } = useGetReceiptVouchersQuery();
+  console.log("payments", payments);
+
   useEffect(() => {
     refetch();
   }, [refetch]);
+
   const navigate = useNavigate();
 
   // Memoized summary of payments month-wise and closing balance
@@ -34,8 +31,10 @@ const ReceiptReport = () => {
     if (!payments) return {}; // Return empty if payments is undefined or null
 
     const summary = payments.reduce((acc, payment) => {
-      const monthYear = getMonthYear(payment.transactionDate); // Use the transactionDate
-      const { creditLedgers } = payment; // Assuming you're dealing with credit-ledgers for payments
+      const monthYear = getMonthYear(payment.date); // Use date instead of transactionDate
+      if (monthYear === "Invalid Date") return acc; // Skip if date is invalid
+
+      const { creditLedgers } = payment;
 
       // Initialize the month if not already present in acc
       if (!acc[monthYear]) {
@@ -61,6 +60,19 @@ const ReceiptReport = () => {
     return summary;
   }, [payments]);
 
+  // Filter month summary based on search query
+  const filteredMonthSummary = useMemo(() => {
+    if (!searchQuery) return monthSummary;
+    return Object.keys(monthSummary)
+      .filter((month) =>
+        month.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .reduce((acc, month) => {
+        acc[month] = monthSummary[month];
+        return acc;
+      }, {});
+  }, [monthSummary, searchQuery]);
+
   // Function to handle row clicks and navigate to detailed month report
   const handleAccountClick = (month) => {
     navigate(`/reports/receiptreport/${month}`);
@@ -76,10 +88,21 @@ const ReceiptReport = () => {
         Receipt Register
       </h2>
 
+      {/* Search Bar */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Month and Year (e.g., September 2024)"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+        />
+      </div>
+
       <div className="block md:hidden grid grid-cols-1 gap-4">
         {/* Mobile View as Cards */}
-        {Object.keys(monthSummary).length > 0 ? (
-          Object.keys(monthSummary).map((month) => (
+        {Object.keys(filteredMonthSummary).length > 0 ? (
+          Object.keys(filteredMonthSummary).map((month) => (
             <div
               key={month}
               onClick={() => handleAccountClick(month)}
@@ -89,11 +112,12 @@ const ReceiptReport = () => {
                 {month}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Total Credit (₹): {monthSummary[month].totalCredit.toFixed(2)}
+                Total Credit (₹):{" "}
+                {filteredMonthSummary[month].totalCredit.toFixed(2)}
               </p>
               <p className="text-gray-600 dark:text-gray-300">
                 Closing Balance (₹):{" "}
-                {monthSummary[month].closingBalance.toFixed(2)}
+                {filteredMonthSummary[month].closingBalance.toFixed(2)}
               </p>
             </div>
           ))
@@ -121,8 +145,8 @@ const ReceiptReport = () => {
             </tr>
           </thead>
           <tbody>
-            {Object.keys(monthSummary).length > 0 ? (
-              Object.keys(monthSummary).map((month) => (
+            {Object.keys(filteredMonthSummary).length > 0 ? (
+              Object.keys(filteredMonthSummary).map((month) => (
                 <tr
                   key={month}
                   onClick={() => handleAccountClick(month)}
@@ -135,12 +159,12 @@ const ReceiptReport = () => {
                   </td>
                   <td className="px-4 py-2 text-gray-700 dark:text-gray-300 text-right text-sm md:text-base">
                     <div className="flex items-center justify-end">
-                      {monthSummary[month].totalCredit.toFixed(2)}
+                      {filteredMonthSummary[month].totalCredit.toFixed(2)}
                     </div>
                   </td>
                   <td className="px-4 py-2 text-gray-700 dark:text-gray-300 text-right text-sm md:text-base">
                     <div className="flex items-center justify-end">
-                      {monthSummary[month].closingBalance.toFixed(2)}
+                      {filteredMonthSummary[month].closingBalance.toFixed(2)}
                     </div>
                   </td>
                 </tr>

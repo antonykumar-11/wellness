@@ -25,23 +25,39 @@ const EmployeeSalarySlipEdit = () => {
   const {
     data: payHeads = [],
     isLoading: payHeadsLoading,
-    isError: payHeadsError,
+
     refetch,
   } = useGetLedgerQuery();
   useEffect(() => {
     refetch();
   }, []);
 
-  const { data: payHeadDetails = [], refetch: refetchPayHeadDetails } =
-    useGetPayHeadDetailsByIdQuery({
-      employeeId,
-      startDate: startDate,
-      endDate: endDate,
-    });
+  const {
+    data: payHeadDetails = [],
+    refetch: refetchPayHeadDetails,
+    isError: payHeadsError,
+  } = useGetPayHeadDetailsByIdQuery({
+    employeeId,
+    startDate,
+    endDate,
+  });
+
+  // useEffect to trigger refetch whenever employeeId, startDate, or endDate changes
   useEffect(() => {
-    console.log("hai it work");
-    refetchPayHeadDetails(); // Refetch data whenever startDate or endDate changes
-  }, [startDate, endDate, refetchPayHeadDetails]);
+    if (employeeId && startDate && endDate) {
+      // Ensure all parameters are available
+      refetchPayHeadDetails(); // Refetch with the updated parameters
+    }
+  }, [employeeId, startDate, endDate, refetchPayHeadDetails]);
+
+  // Optional logging to check query parameters
+  useEffect(() => {
+    console.log("Fetching pay head details with:", {
+      employeeId,
+      startDate,
+      endDate,
+    });
+  }, [employeeId, startDate, endDate]);
   console.log("payHeadDetails", payHeadDetails);
   const [updatePayHeadDetails] = useUpdatePayHeadDetailsMutation();
   const [createPayHeadDetails] = useCreatePayHeadDetailsMutation();
@@ -51,7 +67,7 @@ const EmployeeSalarySlipEdit = () => {
   const [loading, setLoading] = useState(false);
   const [manualTotalHours, setManualTotalHours] = useState("");
   const [manualDaysInMonth, setManualDaysInMonth] = useState("");
-
+  const [searchTerm, setSearchTerm] = useState({});
   useEffect(() => {
     if (Array.isArray(payHeadDetails) && payHeadDetails.length > 0) {
       const allDetails = payHeadDetails.flatMap(
@@ -70,26 +86,40 @@ const EmployeeSalarySlipEdit = () => {
               payHead.displayNameInPayslip || detail.payHeadName || "",
             displayNameInPayslip:
               payHead.displayNameInPayslip || detail.displayNameInPayslip || "",
-            rate: detail.rate || payHead.rate || "", // Ensure rate is assigned
+            rate: detail.rate || payHead.rate || "",
             totalDays: detail.totalDays || 0,
             payHeadType: payHead.payHeadType || detail.payHeadType || "",
             calculationType:
               payHead.calculationType || detail.calculationType || "",
             computedOn: payHead.computedOn || detail.computedOn || "",
-            group: payHead.group || detail.group || "", // Add group
-            nature: payHead.nature || detail.nature || "", // Add nature
-            under: payHead.under || detail.under || "", // Add under
+            group: payHead.group || detail.group || "",
+            nature: payHead.nature || detail.nature || "",
+            under: payHead.under || detail.under || "",
             operations: payHead.operations || detail.operations || [],
           };
         });
 
         setPayHeadDetailsList(newPayHeadDetailsList);
 
+        // Set initial search terms
+        const initialSearchTerms = newPayHeadDetailsList.reduce(
+          (acc, detail, index) => {
+            acc[index] =
+              detail.payHeadName || detail.displayNameInPayslip || "";
+            return acc;
+          },
+          {}
+        );
+
+        setSearchTerm(initialSearchTerms);
+
+        // Additional existing setup logic
         const firstDetail = newPayHeadDetailsList[0];
         const manu = firstDetail.totalHoursPerDay || 0;
         const month = firstDetail.totalDaysPerMonth || 0;
         setManualTotalHours(manu);
         setManualDaysInMonth(month);
+
         const latestRecordDate = payHeadDetails[0]?.date;
         const formattedDate = latestRecordDate
           ? new Date(latestRecordDate).toISOString().split("T")[0]
@@ -99,10 +129,21 @@ const EmployeeSalarySlipEdit = () => {
     }
   }, [payHeadDetails, payHeads]);
 
-  const handlePayHeadChange = (index, event) => {
-    const selectedId = event.target.value;
-    const payHead = payHeads.find((head) => head._id === selectedId);
+  const [isDropdownOpen, setIsDropdownOpen] = useState({});
 
+  const filteredPayHeads = (index) =>
+    payHeads.filter((head) =>
+      (head.displayNameInPayslip || "")
+        .toLowerCase()
+        .includes((searchTerm[index] || "").toLowerCase())
+    );
+
+  const handleSearchTermChange = (index, value) => {
+    setSearchTerm((prev) => ({ ...prev, [index]: value }));
+    setIsDropdownOpen((prev) => ({ ...prev, [index]: true }));
+  };
+
+  const handlePayHeadChange = (index, payHead) => {
     if (payHead) {
       const computedOn =
         payHead.operations
@@ -134,52 +175,9 @@ const EmployeeSalarySlipEdit = () => {
     updatedPayHeadDetailsList[index][field] = value;
     setPayHeadDetailsList(updatedPayHeadDetailsList);
   };
-
-  // const handleCreate = async () => {
-  //   try {
-  //     const newPayHeadDetails = {
-  //       date,
-  //       details: payHeadDetailsList.map((detail) => ({
-  //         payHeadId: detail.payHead?._id,
-  //         displayNameInPayslip: detail.displayNameInPayslip,
-  //         payHeadName: detail.displayNameInPayslip,
-  //         rate: detail.rate,
-  //         totalDays: detail.totalDays,
-  //         payHeadType: detail.payHeadType,
-  //         calculationType: detail.calculationType,
-  //         computedOn: detail.computedOn,
-  //         totalHoursPerDay: manualTotalHours || 0,
-  //         totalDaysPerMonth: manualDaysInMonth || 0,
-  //         group: detail.group, // Add group
-  //         nature: detail.nature, // Add nature
-  //         under: detail.under, // Add under
-  //       })),
-  //     };
-
-  //     const response = await createPayHeadDetails({
-  //       ...newPayHeadDetails,
-  //       employeeId,
-  //     }).unwrap();
-  //     setLoading(true); // Start loading
-  //     setPayHeadDetailsList([]);
-  //     setDate("");
-
-  //     alert("Pay head details saved successfully!");
-  //     await refetchPayHeadDetails();
-
-  //     setLoading(false); // End loading
-  //   } catch (error) {
-  //     console.error("Save error:", error);
-  //     alert("Failed to save pay head details.");
-  //   }
-  // };
   const handleDateRangeChange = (event) => {
     const { name, value } = event.target;
-    if (name === "startDate") {
-      setStartDate(value);
-    } else if (name === "endDate") {
-      setEndDate(value);
-    }
+    name === "startDate" ? setStartDate(value) : setEndDate(value);
   };
   console.log("detail.computedOn", payHeadDetailsList);
   const handleCreate = async () => {
@@ -252,15 +250,7 @@ const EmployeeSalarySlipEdit = () => {
     }
   };
 
-  if (payHeadsLoading || loading) {
-    return <Loader />;
-  }
-
-  if (payHeadsError) {
-    return <div>Error loading pay heads. Please try again.</div>;
-  }
-
-  if (!payHeadDetails || payHeadDetails.length === 0) {
+  if (payHeadsError || !payHeadDetails || payHeadDetails.length === 0) {
     return (
       <div className="">
         {" "}
@@ -295,45 +285,6 @@ const EmployeeSalarySlipEdit = () => {
       </div>
     );
   }
-
-  //   try {
-  //     const newPayHeadDetails = {
-  //       date,
-  //       details: payHeadDetailsList.map((detail) => ({
-  //         payHeadId: detail.payHead?._id,
-  //         payHeadName: detail.payHeadName,
-  //         displayNameInPayslip: detail.displayNameInPayslip,
-  //         rate: detail.rate,
-  //         totalDays: detail.totalDays,
-  //         payHeadType: detail.payHeadType,
-  //         calculationType: detail.calculationType,
-  //         computedOn: detail.computedOn,
-  //         group: detail.group, // Include group
-  //         nature: detail.nature, // Include nature
-  //         under: detail.under, // Include under
-  //         totalHoursPerDay: manualTotalHours || 0,
-  //         totalDaysPerMonth: manualDaysInMonth || 0,
-  //       })),
-  //     };
-
-  //     const response = await updatePayHeadDetails({
-  //       ...newPayHeadDetails,
-  //       employeeId,
-  //     }).unwrap();
-  //     setLoading(true); // Start loading
-
-  //     setPayHeadDetailsList([]);
-  //     setDate("");
-
-  //     alert("Pay head details updated successfully!");
-  //     await refetchPayHeadDetails();
-
-  //     setLoading(false); // End loading
-  //   } catch (error) {
-  //     console.error("Save error:", error);
-  //     alert("Failed to update pay head details.");
-  //   }
-  // };
 
   const addNewPayHeadDetail = () => {
     setPayHeadDetailsList([
@@ -372,12 +323,10 @@ const EmployeeSalarySlipEdit = () => {
     }
   };
 
-  if (loading) {
-    return <Loader />;
-  }
+  if (payHeadsLoading || loading) return <Loader />;
 
   return (
-    <div className="p-4 max-w-full overflow-x-auto bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10">
+    <div className="p-4 max-w-full  bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10">
       <ToastContainer />
       <div>
         {" "}
@@ -445,51 +394,86 @@ const EmployeeSalarySlipEdit = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="">
         <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 rounded-lg shadow">
           <thead>
             <tr>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Pay Head
-              </th>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Rate
-              </th>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Total Days for Driver
-              </th>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Pay Head Type
-              </th>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Calculation Type
-              </th>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Computed On
-              </th>
-              <th className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold">
-                Actions
-              </th>
+              {[
+                "Pay Head",
+                "Rate",
+                "Total Days for Driver",
+                "Pay Head Type",
+                "Calculation Type",
+                "Computed On",
+                "Actions",
+              ].map((header) => (
+                <th
+                  key={header}
+                  className="border-b border-gray-300 dark:border-gray-600 p-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-300"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {payHeadDetailsList.map((detail, index) => (
-              <tr key={index}>
-                <td className="p-2">
-                  <select
-                    onChange={(e) => handlePayHeadChange(index, e)}
-                    value={detail.payHead?._id || ""}
-                    className="border border-gray-300 rounded px-2 py-1 w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="">Select Pay Head</option>
-                    {payHeadsLoading && <option>Loading...</option>}
-                    {payHeadsError && <option>Error loading pay heads</option>}
-                    {payHeads.map((head) => (
-                      <option key={head._id} value={head._id}>
-                        {head.displayNameInPayslip}
-                      </option>
-                    ))}
-                  </select>
+              <tr
+                key={index}
+                className="hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <td className=" relative">
+                  <input
+                    type="text"
+                    placeholder="Search Pay Head..."
+                    value={searchTerm[index] || ""}
+                    onChange={(e) =>
+                      handleSearchTermChange(index, e.target.value)
+                    }
+                    onClick={() =>
+                      setIsDropdownOpen((prev) => ({ ...prev, [index]: true }))
+                    }
+                    className="w-full  py-1 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring focus:ring-blue-200"
+                  />
+                  {isDropdownOpen[index] && (
+                    <div
+                      className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
+                      style={{
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        display: "flex",
+                        alignItems: "flex-start", // Align content to the top
+                      }}
+                    >
+                      <ul className="flex flex-col">
+                        {filteredPayHeads(index).length > 0 ? (
+                          filteredPayHeads(index).map((head) => (
+                            <li
+                              key={head._id}
+                              onClick={() => {
+                                handlePayHeadChange(index, head);
+                                setIsDropdownOpen((prev) => ({
+                                  ...prev,
+                                  [index]: false,
+                                }));
+                                setSearchTerm((prev) => ({
+                                  ...prev,
+                                  [index]: head.displayNameInPayslip,
+                                }));
+                              }}
+                              className="py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {head.displayNameInPayslip}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                            No results found
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
                 </td>
 
                 <td className="p-2">

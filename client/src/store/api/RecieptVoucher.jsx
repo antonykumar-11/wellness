@@ -30,10 +30,10 @@ export const receiptVouchersApi = createApi({
       }),
     }),
     updateReceiptVoucher: builder.mutation({
-      query: ({ transactionId, updatedPurchase }) => ({
+      query: ({ transactionId, ...voucherData }) => ({
         url: `receipt-vouchers/${transactionId}`,
         method: "PUT",
-        body: updatedPurchase,
+        body: voucherData,
       }),
     }),
     checkVoucherNumber: builder.query({

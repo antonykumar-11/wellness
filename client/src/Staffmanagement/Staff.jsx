@@ -101,7 +101,15 @@ const CreateEmployeeForm = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  const [askHelp, setAskHelp] = useState(false); // State to manage modal visibility
 
+  const openModalAsk = () => {
+    setAskHelp(true); // Function to open the modal
+  };
+
+  const closeModalAsk = () => {
+    setAskHelp(false); // Function to close the modal
+  };
   const handleSelect = (group) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -165,7 +173,7 @@ const CreateEmployeeForm = () => {
       navigate("/staff/payHeadDetails");
     } catch (error) {
       console.error("Failed to save ledger or employee: ", error);
-      toast.error("Failed to save ledger or employee.");
+      toast.error(error.data.message);
     }
   };
 
@@ -211,11 +219,56 @@ const CreateEmployeeForm = () => {
         onSubmit={handleSubmit}
         className="max-w-[95%] mx-auto p-8 bg-gray-100 dark:bg-gray-900 rounded shadow-md  mt-10 relative"
       >
-        <div className="absolute bottom-4 right-4 w-full md:w-auto md:mt-4 text-gray-500 dark:text-gray-400">
+        <div className="absolute bottom-4 mt-6 left-4 w-full md:w-auto md:mt-4 text-gray-500 dark:text-gray-400 flex">
+          {askHelp && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70 overflow-y-auto">
+              <div className="bg-white lg:mr-24 rounded-lg p-6 md:p-8 max-w-lg md:max-w-6xl mx-auto relative shadow-lg border border-blue-300">
+                <button
+                  onClick={closeModalAsk} // Close modal when "Thank You" is clicked
+                  className="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+                >
+                  Thank You
+                </button>
+                <h2 className="text-xl font-bold text-center mb-4 text-blue-600 tracking-wide">
+                  Information Guide
+                </h2>
+                <div className="overflow-y-auto max-h-[70vh]">
+                  {" "}
+                  {/* Limit height for scrolling */}
+                  <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                    <span className="font-semibold">Who is :</span>ഈ എംപ്ലോയീ
+                    (Epmloyee) കമ്പനിയുടെ ആരാണെന്നാണ് ചോദിക്കുന്നത് Owner or
+                    Driver നമ്മൾ തിരഞ്ഞെടുക്കണം
+                  </p>
+                  <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                    <span className="font-semibold">For Company :</span>ഈ
+                    എംപ്ലോയീ ( Employee) കമ്പനിക്ക് ആരാണെന്നാണ് ചോദിക്കുന്നത്
+                    നമ്മൾ പറയണം എന്താണോ ഈ ജോലിക്കാരന്റെ പേര് ( example : johnson
+                    ) അതിനോടൊപ്പം Salary എന്ന് കൊടുക്കണം. final ( Johnson
+                    Salary) .
+                  </p>
+                  <p className="text-sm mb-4 leading-relaxed tracking-wide">
+                    <span className="font-semibold">In group:</span>ഈ
+                    ജോലിക്കാരന് നമ്മൾ Johnson Salary എന്ന് കൊടുത്തു .ഇനി ഇത്
+                    എന്തിന്റെ കീഴിൽ എന്ന് പറഞ്ഞു കൊടുക്കണം . എല്ലായിപ്പോഴും ഇത്
+                    Indirect Expense ആയിരിക്കും . ഇത് കമ്പനിക്ക് ചിലവാണ് .
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <div
+            onClick={openModalAsk} // On button click, open the modal
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2"
+          >
+            Any Help
+          </div>
+        </div>
+        <div className="absolute bottom-4 mt-6 right-4 w-full md:w-auto md:mt-4 text-gray-500 dark:text-gray-400 flex">
           <button
-            type="submit"
+            onClick={handleSubmit}
             disabled={isLoading}
-            className={`py-2 px-4 rounded-md shadow-md w-full  ${
+            className={`py-2 px-4 rounded-md shadow-md w-full ${
               isLoading ? "bg-gray-400" : "bg-red-500 hover:bg-green-600"
             } text-white`}
           >

@@ -1,511 +1,16 @@
-// import { useState, useEffect } from "react";
-// import {
-//   useUpdateEmployeeByIdMutation,
-//   useGetEmployeeDetailsByIdQuery,
-// } from "../store/api/StaffApi";
-// import { useParams } from "react-router-dom";
-
-// const UpdateEmployeeForm = () => {
-//   const { employeeId } = useParams();
-//   console.log("transactionId", employeeId);
-
-//   const [updateEmployee] = useUpdateEmployeeByIdMutation();
-
-//   const [formData, setFormData] = useState({
-//     registrationType: "employee",
-//     employeeRegistration: {
-//       name: "",
-//       designation: "",
-//       address: "",
-//       gender: "",
-//       dateOfBirth: "",
-//       bloodGroup: "",
-//       fatherOrMotherName: "",
-//       spouseName: "",
-//       contact: { phone: "", email: "" },
-//       bankDetails: { bankName: "", accountNumber: "", ifscCode: "" },
-//       incomeTaxPAN: "",
-//       aadhaarCard: "",
-//       pfAccountNumber: "",
-//       prAccountNumber: "",
-//       under: "",
-//       esiNumber: "",
-//       dateOfHire: "",
-//       panCardNo: "",
-//     },
-//     under: "",
-//     name: "",
-//     group: "",
-//   });
-//   console.log(
-//     "formDatahere................................................ data",
-//     formData.employeeRegistration.contact.phone
-//   );
-//   const [avatar, setAvatar] = useState("");
-//   const [avatarPreview, setAvatarPreview] = useState(
-//     "/images/default_avatar.png"
-//   );
-
-//   const {
-//     data: specificEmployee,
-//     isLoading: voucherLoading,
-//     isError: voucherError,
-//     refetch: refetchVoucherData,
-//   } = useGetEmployeeDetailsByIdQuery(employeeId || "", {
-//     skip: !employeeId,
-//   });
-//   const [updateEmployee] = useUpdateEmployeeByIdMutation();
-//   console.log("paymentVoucher", specificEmployee);
-
-//   useEffect(() => {
-//     if (specificEmployee) {
-//       setFormData((prevState) => ({
-//         ...prevState,
-//         employeeRegistration: {
-//           ...prevState.employeeRegistration,
-//           ...specificEmployee,
-//           dateOfHire: formatDate(specificEmployee.dateOfHire),
-//           dateOfBirth: formatDate(specificEmployee.dateOfBirth),
-//         },
-//         under: specificEmployee.under || prevState.under,
-//         name: specificEmployee.name || prevState.name,
-//         group: specificEmployee.group || prevState.group,
-//       }));
-
-//       if (specificEmployee.avatar) {
-//         setAvatarPreview(specificEmployee.avatar);
-//       }
-//     }
-//   }, [specificEmployee]);
-
-//   const formatDate = (date) => {
-//     if (!date) return "";
-//     return new Date(date).toISOString().split("T")[0];
-//   };
-
-//   const handleImageChange = (e) => {
-//     const reader = new FileReader();
-//     reader.onload = () => {
-//       if (reader.readyState === 2) {
-//         setAvatarPreview(reader.result);
-//         setAvatar(e.target.files[0]);
-//       }
-//     };
-//     reader.readAsDataURL(e.target.files[0]);
-//   };
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     const keys = name.split("."); // Split the name to determine the nesting level
-
-//     if (keys.length === 1) {
-//       // Handle non-nested fields
-//       setFormData((prevState) => ({
-//         ...prevState,
-//         [keys[0]]: value,
-//       }));
-//     } else if (keys.length === 2) {
-//       // Handle nested fields (first level of nesting)
-//       setFormData((prevState) => ({
-//         ...prevState,
-//         [keys[0]]: {
-//           ...prevState[keys[0]],
-//           [keys[1]]: value,
-//         },
-//       }));
-//     } else if (keys.length === 3) {
-//       // Handle deeply nested fields (second level of nesting)
-//       setFormData((prevState) => ({
-//         ...prevState,
-//         [keys[0]]: {
-//           ...prevState[keys[0]],
-//           [keys[1]]: {
-//             ...prevState[keys[0]][keys[1]],
-//             [keys[2]]: value,
-//           },
-//         },
-//       }));
-//     }
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     try {
-//       // Create FormData instance for employee registration
-//       const formDataToSubmit = new FormData();
-
-//       // Append employee registration fields
-//       Object.keys(formData.employeeRegistration).forEach((key) => {
-//         const value = formData.employeeRegistration[key];
-//         if (typeof value === "object" && value !== null) {
-//           Object.keys(value).forEach((subKey) => {
-//             formDataToSubmit.append(
-//               `employeeRegistration.${key}.${subKey}`,
-//               value[subKey]
-//             );
-//           });
-//         } else {
-//           formDataToSubmit.append(`employeeRegistration.${key}`, value);
-//         }
-//       });
-
-//       // Append the avatar file to FormData if selected
-//       if (avatar) {
-//         formDataToSubmit.append("avatar", avatar);
-//       }
-
-//       // Add employee ID to FormData if updating an existing employee
-//       formDataToSubmit.append("employeeId", employeeId);
-
-//       // Debug FormData content
-//       for (const [key, value] of formDataToSubmit.entries()) {
-//         console.log(key, value);
-//       }
-
-//       // Submit employee data
-//       const employeeResponse = await updateEmployee({
-//         id: employeeId,
-//         data: formDataToSubmit,
-//       }).unwrap();
-//       console.log("Employee updated successfully", employeeResponse);
-
-//       // Reset form data after successful submission
-//       setFormData({
-//         registrationType: "employee",
-//         employeeRegistration: {
-//           name: "",
-//           designation: "",
-//           address: "",
-//           gender: "",
-//           dateOfBirth: "",
-//           bloodGroup: "",
-//           fatherOrMotherName: "",
-//           spouseName: "",
-//           contact: { phone: "", email: "" },
-//           bankDetails: { bankName: "", accountNumber: "", ifscCode: "" },
-//           incomeTaxPAN: "",
-//           aadhaarCard: "",
-//           pfAccountNumber: "",
-//           prAccountNumber: "",
-//           under: "",
-//           esiNumber: "",
-//           dateOfHire: "",
-//         },
-//         under: "",
-//         name: "",
-//         group: "",
-//       });
-
-//       alert("Employee and Ledger updated successfully!");
-//     } catch (error) {
-//       console.error("Failed to update employee or ledger: ", error);
-//       alert("Failed to update employee or ledger.");
-//     }
-//   };
-
-//   return (
-//     <div className="p-16">
-//       <form
-//         onSubmit={handleSubmit}
-//         className="max-w-[95%] mx-auto p-8 bg-gray-100 dark:bg-gray-900 rounded shadow-md"
-//       >
-//         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-//           {/* Form Fields */}
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Name
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.name"
-//               value={formData.employeeRegistration.name}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Date of Birth
-//             </label>
-//             <input
-//               type="date"
-//               name="employeeRegistration.dateOfBirth"
-//               value={formData.employeeRegistration.dateOfBirth}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Address
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.address"
-//               value={formData.employeeRegistration.address}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Phone
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.contact.phone"
-//               value={formData.employeeRegistration.contact.phone}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Email
-//             </label>
-//             <input
-//               type="email"
-//               name="employeeRegistration.contact.email"
-//               value={formData.employeeRegistration.contact.email}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Spouse Name
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.spouseName"
-//               value={formData.employeeRegistration.spouseName}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Parent's Name
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.fatherOrMotherName"
-//               value={formData.employeeRegistration.fatherOrMotherName}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Blood Group
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.bloodGroup"
-//               value={formData.employeeRegistration.bloodGroup}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Date of Hire
-//             </label>
-//             <input
-//               type="date"
-//               name="employeeRegistration.dateOfHire"
-//               value={formData.employeeRegistration.dateOfHire}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Designation
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.designation"
-//               value={formData.employeeRegistration.designation}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Aadhaar Card
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.aadhaarCard"
-//               value={formData.employeeRegistration.aadhaarCard}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               PAN Card No
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.panCardNo"
-//               value={formData.employeeRegistration.panCardNo}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Income Tax PAN
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.incomeTaxPAN"
-//               value={formData.employeeRegistration.incomeTaxPAN}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               PF Account Number
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.pfAccountNumber"
-//               value={formData.employeeRegistration.pfAccountNumber}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               PR Account Number
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.prAccountNumber"
-//               value={formData.employeeRegistration.prAccountNumber}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               ESI Number
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.esiNumber"
-//               value={formData.employeeRegistration.esiNumber}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Bank Name
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.bankDetails.bankName"
-//               value={formData.employeeRegistration.bankDetails.bankName}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               Account Number
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.bankDetails.accountNumber"
-//               value={formData.employeeRegistration.bankDetails.accountNumber}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">
-//               IFSC Code
-//             </label>
-//             <input
-//               type="text"
-//               name="employeeRegistration.bankDetails.ifscCode"
-//               value={formData.employeeRegistration.bankDetails.ifscCode}
-//               onChange={handleChange}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
-//             />
-//           </div>
-//         </div>
-
-//         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mt-6 gap-4">
-//           {/* Avatar Upload */}
-//           <div className="w-full lg:w-1/2 bg-gray-900 text-white shadow-md rounded-md">
-//             <div className="flex items-center space-x-4">
-//               <figure className="w-24 h-24 flex-shrink-0">
-//                 <img
-//                   src={avatarPreview}
-//                   className="w-full h-full object-cover rounded-full border border-gray-600"
-//                   alt="Avatar"
-//                 />
-//               </figure>
-//               <div className="flex-1">
-//                 <input
-//                   type="file"
-//                   name="avatar"
-//                   onChange={handleImageChange}
-//                   className="hidden"
-//                   id="customFile"
-//                 />
-//                 <label
-//                   htmlFor="customFile"
-//                   className="mt-1 block py-2 px-4 border border-gray-600 rounded-md text-sm font-medium text-white cursor-pointer hover:bg-gray-700"
-//                 >
-//                   Choose File
-//                 </label>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="flex items-center justify-between mt-6">
-//             <button
-//               type="submit"
-//               disabled={voucherLoading}
-//               className={`py-2 px-4 rounded-md shadow-md ${
-//                 voucherLoading
-//                   ? "bg-gray-400"
-//                   : "bg-green-500 hover:bg-green-600"
-//               } text-white`}
-//             >
-//               {voucherLoading ? "Creating..." : "Create Employee"}
-//             </button>
-//           </div>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default UpdateEmployeeForm;
-
 import { useState, useEffect, useRef } from "react";
 
 import { useGetTaxesQuery } from "../store/api/TaxApi";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { useGetGroupsQuery } from "../store/api/Group";
 import UnderPayHead1 from "../employeepreview/UnderPayHead2";
-import { useCreateLedgerMutation } from "../store/api/LedgerPayHead";
-import { useGetLedgerQuery } from "../store/api/LedgerApi";
+// import { useUpdateLedgerMutation } from "../store/api/LedgerPayHead";
+
 import {
-  Navigate,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+  useGetLedgerQuery,
+  useUpdateLedgerMutation,
+} from "../store/api/LedgerApi";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -513,14 +18,13 @@ import {
   useGetEmployeeDetailsByIdQuery,
 } from "../store/api/StaffApi";
 const UpdateEmployeeForm = () => {
+  const navigate = useNavigate();
   const { employeeId } = useParams();
-  console.log("transactionId", employeeId);
 
-  const location = useLocation();
   const dropdownRef = useRef(null);
-  const navigate = useNavigate;
-  const [createEmployee] = useUpdateEmployeeByIdMutation();
-  const [createLedger] = useCreateLedgerMutation();
+
+  const [updateEmployeeById] = useUpdateEmployeeByIdMutation();
+  const [updateLedger] = useUpdateLedgerMutation();
   const {
     data: specificEmployee,
     isLoading: voucherLoading,
@@ -532,6 +36,9 @@ const UpdateEmployeeForm = () => {
   const { data: getLedger } = useGetLedgerQuery(employeeId || "", {
     skip: !employeeId,
   });
+  useEffect(() => {
+    refetchVoucherData();
+  }, [refetchVoucherData]);
   console.log("getLedger", getLedger);
   console.log("paymentVoucher", specificEmployee);
   const [formData, setFormData] = useState({
@@ -563,6 +70,7 @@ const UpdateEmployeeForm = () => {
     category: "",
     nature: "",
     selectedOption: "",
+    ledgerId: "",
   });
   console.log("hai", formData);
   const [avatar, setAvatar] = useState("");
@@ -607,6 +115,7 @@ const UpdateEmployeeForm = () => {
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  console.log("specificEmployee", specificEmployee);
   useEffect(() => {
     if (specificEmployee && getLedger && getLedger.length > 0) {
       const ledger = getLedger[0]; // Accessing the first item in the getLedger array
@@ -615,8 +124,10 @@ const UpdateEmployeeForm = () => {
         ...prevState,
         registrationType:
           specificEmployee.registrationType || prevState.registrationType,
-        name: specificEmployee.name || prevState.name,
+        name: specificEmployee.underEmployee || prevState.name,
+        ledgerId: ledger._id || "",
         stockName: ledger.name || prevState.stockName,
+        userName: specificEmployee.userName || specificEmployee.name,
         designation: specificEmployee.designation || prevState.designation,
         address: specificEmployee.address || prevState.address,
         gender: specificEmployee.gender || prevState.gender,
@@ -641,7 +152,8 @@ const UpdateEmployeeForm = () => {
           specificEmployee.pfAccountNumber || prevState.pfAccountNumber,
         prAccountNumber:
           specificEmployee.prAccountNumber || prevState.prAccountNumber,
-        under: specificEmployee.under || prevState.under,
+        under: specificEmployee.under?._id || prevState.under,
+        avatar: specificEmployee.under?.avatar || "",
         esiNumber: specificEmployee.esiNumber || prevState.esiNumber,
         dateOfHire:
           formatDate(specificEmployee.dateOfHire) || prevState.dateOfHire, // Format Date of Hire
@@ -654,8 +166,8 @@ const UpdateEmployeeForm = () => {
       }));
 
       // Set avatar preview if available
-      if (specificEmployee.avatar) {
-        setAvatarPreview(specificEmployee.avatar);
+      if (specificEmployee.under.avatar) {
+        setAvatarPreview(specificEmployee.under.avatar);
       }
     }
   }, [specificEmployee, getLedger]); // Added getLedger to the dependency array
@@ -696,16 +208,20 @@ const UpdateEmployeeForm = () => {
       gender: e.target.value, // Update gender selection
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Ensure 'under' is selected before proceeding
     if (!formData.under) {
       toast.error("Please select a valid group before saving the ledger.");
       return;
     }
 
     try {
+      // Step 1: Update Ledger
       const ledgerData = {
+        payHeadType: "Staff",
         name: formData.stockName,
         under: formData.underForLedger,
         group: formData.group,
@@ -713,25 +229,43 @@ const UpdateEmployeeForm = () => {
         category: formData.category,
       };
 
-      const ledgerResponse = await createLedger(ledgerData).unwrap();
-      console.log("Ledger created successfully", ledgerResponse);
+      // Update the ledger
+      const ledgerResponse = await updateLedger({
+        id: formData.ledgerId,
+        updatedPurchase: ledgerData,
+      }).unwrap();
 
-      const formDataToSubmit = new FormData();
-      Object.keys(formData).forEach((key) => {
-        formDataToSubmit.append(key, formData[key]);
-      });
+      if (ledgerResponse.payHeadType === "Staff") {
+        const formDataToSubmit = new FormData();
 
-      if (avatar) {
-        formDataToSubmit.append("avatar", avatar);
+        // Add all fields from formData to formDataToSubmit
+        Object.keys(formData).forEach((key) => {
+          formDataToSubmit.append(key, formData[key]);
+        });
+
+        // Add avatar if available
+        if (avatar) {
+          formDataToSubmit.append("avatar", avatar);
+        }
+
+        // Step 2: Update Employee record
+        const employeeResponse = await updateEmployeeById({
+          id: employeeId,
+          data: formDataToSubmit,
+        }).unwrap();
+
+        if (employeeResponse.message === "Employee Updated Successfully") {
+          // Proceed to next page without needing new data
+          navigate("/staff/payHeadDetails"); // Navigate to the desired page
+          resetFormData(); // Reset the form data
+          toast.success("Employee updated successfully!"); // Show success toast
+        }
       }
-
-      const employeeResponse = await createEmployee(formDataToSubmit).unwrap();
-      navigate("/staff/payHeadDetails");
-      resetFormData();
-      toast.success("Employee and Ledger saved successfully!");
     } catch (error) {
-      console.error("Failed to save ledger or employee: ", error);
-      toast.error("Failed to save ledger or employee.");
+      console.error("Failed to update ledger or employee:", error);
+      const errorMessage =
+        error?.data?.message || "Failed to update ledger or employee.";
+      toast.error(errorMessage); // Show error toast
     }
   };
 
@@ -739,6 +273,7 @@ const UpdateEmployeeForm = () => {
     setFormData({
       registrationType: "employee",
       name: "",
+      userName: "",
       stockName: "",
       designation: "",
       address: "",
@@ -812,7 +347,7 @@ const UpdateEmployeeForm = () => {
               selectedOption={formData.under || "hai"} // Pass selected option here
               hello={handleDropdownChange} // Handles dropdown selection
               options={ledgers || []} // Options to display in dropdown
-              manu={formData.stockName}
+              manu={formData.name}
             />
           </div>
           <div className="lg:col-span-1">
@@ -892,8 +427,8 @@ const UpdateEmployeeForm = () => {
             </label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="userName"
+              value={formData.userName}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
               placeholder=""
@@ -1051,7 +586,7 @@ const UpdateEmployeeForm = () => {
             <input
               type="text"
               name="contactEmail"
-              value={formData.Email}
+              value={formData.contactEmail}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
               placeholder=""

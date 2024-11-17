@@ -117,7 +117,7 @@ function Sidebar({ isSidebarOpen }) {
         } py-3 mx-4`}
       >
         <ShoppingBasket size={28} />
-        <span className={`text-xl ${!isOpen && "hidden"}`}>Inventory</span>
+        <span className={`text-xl ${!isOpen && "hidden"}`}>Invoice</span>
       </NavLink>
 
       <div className="flex flex-col ">

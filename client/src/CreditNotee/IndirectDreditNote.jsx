@@ -7,43 +7,43 @@ import {
   useGetCompaniesQuery,
   useCreateCompanyMutation,
 } from "../store/api/CompanyApi";
+import {
+  useGetStockGroupsQuery,
+  useCreateStockGroupMutation,
+} from "../store/api/StockGroupApi";
 
 import CreateCompanyModal from "../vouchers/dummy2/CompanyCreateModal";
-import { useGetPurchasesQuery } from "../store/api/PurchaseApi";
-import {
-  useCreateSalesVoucherMutation,
-  useCheckVoucherNumberQuery,
-} from "../store/api/SalesApi";
+import { useCreateDebitNoteMutation } from "../store/api/DebitNoteApi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CreateStockModal from "../vouchers/dummy2/CreateStock";
+import { useGetPurchasesSomeQuery } from "../store/api/PurchaseApi";
 import Ledger from "../vouchers/dummy2/Ledger";
 import { FaPlus, FaBuilding, FaBook } from "react-icons/fa";
-import { useGetLedgerAllPurchaseQuery } from "../store/api/LedgerApi";
-const SalesVoucher = () => {
+const IndirectDreditNote = () => {
   const { data: companyData = [], refetch: refetching } =
     useGetCompaniesQuery();
 
   const { data: ledgerData = [], refetch } = useGetLedgerQuery();
-
-  // const { data: stockData = [], refetch: stockrefetch } =
-  //   useGetPurchasesQuery();
-
-  const { data: stockData = [], refetch: stockItemsrefetch } =
-    useGetLedgerAllPurchaseQuery();
-  console.log("stockData ", stockData);
-  useEffect(() => {
-    // stockrefetch();
-    stockItemsrefetch();
-  }, [stockItemsrefetch]);
+  console.log("data", ledgerData);
+  const { data: stockData = [], refetch: stockrefetch } =
+    useGetStockGroupsQuery();
 
   const [purchaseData, setPurchaseData] = useState({
-    voucherType: "Sales Voucher",
+    voucherType: "Indirect Debit Note",
     voucherNumber: "",
     transactionDate: "",
-
-    saleInvoiceNumber: "",
-
+    creditPeriod: "",
+    creditAmount: "",
+    creditDueDate: "",
+    purposeOfPayment: "",
+    thisPurchase: "New bill", // Initial value matching dropdown
+    status: "Unsettled",
+    authorizedBy: {
+      name: "",
+      designation: "",
+      signature: "",
+    },
     purchasedBy: "",
     purchasedTo: "",
     description: "",
@@ -52,17 +52,16 @@ const SalesVoucher = () => {
         id: 1,
         serialNumber: "1",
         stockName: "",
-
-        quantity: 1,
-        rate: "",
+        description: "",
+        quantity: "",
+        price: "",
         amount: 0,
         unit: "",
-        actualrate: "",
         hsnCode: "",
         taxRate: "",
         taxAmount: 0,
-
-        stockId: "",
+        stockGroup: "",
+        stockGroupName: "",
         subtotal: 0,
         total: 0,
       },
@@ -76,7 +75,7 @@ const SalesVoucher = () => {
     taxAmount: 0,
     total: 0,
   });
-  console.log("salesData", purchaseData);
+  console.log("purchaseDatasdetails", purchaseData);
   const handleChange = (e) => {
     const { name, value } = e.target;
     const keys = name.split(".");
@@ -99,7 +98,7 @@ const SalesVoucher = () => {
 
   const [searchTermDebit, setSearchTermDebit] = useState("");
   const [searchTermCredit, setSearchTermCredit] = useState("");
-
+  console.log("searchTermCredit", searchTermCredit);
   const [searchTermStock, setSearchTermStock] = useState("");
   const [purchaseToName, setPurchaseToName] = useState("");
   const [purchaseByName, setPurchaseByName] = useState("");
@@ -115,77 +114,9 @@ const SalesVoucher = () => {
     purchaseBy: false,
     purchaseTo: false,
   });
-  const { data: voucherCheck, refetch: voucherChecking } =
-    useCheckVoucherNumberQuery();
-  const { data: Purchase } = useGetPurchasesQuery();
-  console.log("Purchase ", Purchase);
-  const [selectedVoucherIds, setSelectedVoucherIds] = useState("New bill");
 
-  const [selectedPayments, setSelectedPayments] = useState("Unsettled");
-  // Handle voucher number check
-
-  useEffect(() => {
-    if (voucherCheck && voucherCheck.length > 0) {
-      // Extract existing voucher numbers
-      const existingVoucherNumbers = voucherCheck.map(
-        (voucher) => voucher.voucherNumber
-      );
-
-      // Find the maximum voucher number
-      const maxVoucherNumber = Math.max(...existingVoucherNumbers, -1);
-
-      // Set the new voucher number
-      const newVoucherNumber = maxVoucherNumber + 1;
-
-      // Update the purchase data
-      setPurchaseData((prevData) => ({
-        ...prevData,
-        voucherNumber: newVoucherNumber, // Set the incremented voucher number
-      }));
-    }
-  }, [voucherCheck]);
-  const [askHelp, setAskHelp] = useState(false); // State to manage modal visibility
-
-  const openModalAsk = () => {
-    setAskHelp(true); // Function to open the modal
-  };
-
-  const closeModalAsk = () => {
-    setAskHelp(false); // Function to close the modal
-  };
-  // Filter stock data based on search term
-  useEffect(() => {
-    setPurchaseData((prevData) => ({
-      ...prevData,
-      thisPurchase: selectedVoucherIds, // Update with selected voucher option
-    }));
-  }, [selectedVoucherIds]);
-  useEffect(() => {
-    if (purchaseData.transactionDate && purchaseData.creditPeriod) {
-      const transactionDate = new Date(purchaseData.transactionDate);
-
-      const creditDueDate = new Date(transactionDate);
-
-      creditDueDate.setDate(
-        creditDueDate.getDate() + parseInt(purchaseData.creditPeriod)
-      );
-
-      setPurchaseData((prevData) => ({
-        ...prevData,
-        creditDueDate: creditDueDate.toISOString().split("T")[0],
-      }));
-    }
-  }, [purchaseData.transactionDate, purchaseData.creditPeriod]);
-
-  // Update purchaseData when payment status is selected
-  useEffect(() => {
-    setPurchaseData((prevData) => ({
-      ...prevData,
-      status: selectedPayments, // Update with selected payment status
-    }));
-  }, [selectedPayments]);
   const [createSales, { isLoading, isSuccess, isError, error }] =
-    useCreateSalesVoucherMutation();
+    useCreateDebitNoteMutation();
   const handleSaveAndSubmit = async (e) => {
     e.preventDefault();
 
@@ -194,16 +125,13 @@ const SalesVoucher = () => {
       await createSales(purchaseData).unwrap();
 
       // Optionally reset the form or provide feedback to the user
-      // Step 2: Refetch the voucher numbers after successful sales creation
-      voucherChecking(); // Refetch the voucher numbers
-      stockItemsrefetch();
       setPurchaseData({
         voucherNumber: "",
         transactionDate: "",
         creditPeriod: "",
         creditAmount: "",
         creditDueDate: "",
-        saleInvoiceNumber: "",
+        purposeOfPayment: "",
         authorizedBy: {
           name: "",
           designation: "",
@@ -214,20 +142,18 @@ const SalesVoucher = () => {
         description: "",
         items: [
           {
-            stockName: "",
-
-            quantity: 1,
-            rate: "",
-            amount: 0,
+            stockGroup: "",
+            description: "",
             unit: "",
-            actualrate: "",
             hsnCode: "",
+            rate: 0,
             taxRate: "",
-            taxAmount: 0,
-
-            stockId: "",
-            subtotal: 0,
-            total: 0,
+            stockGroupId: "",
+            taxAmount: "",
+            quantity: 0,
+            amount: 0,
+            stockName: "",
+            stockItem: "",
           },
         ],
         debitLedgers: [
@@ -263,19 +189,108 @@ const SalesVoucher = () => {
       setSearchTermStock(""); // Reset stock search term
       setIsDropdownOpen({ stock: false }); // Close dropdown
       // Show success toast with 3-second auto-close
-      toast.success("Sales created successfully!", {
+      toast.success("Indirect DebitNote created successfully!", {
         autoClose: 3000, // Close after 3 seconds
       });
     } catch (error) {
-      console.error("Failed to create sales:", error);
+      console.error("Failed to create Indirect Debit Note:", error);
 
       // Show error toast with 3-second auto-close
-      toast.error("An error occurred while creating the purchase.", {
+      toast.error("An error occurred while creating the Debit Note.", {
         autoClose: 3000, // Close after 3 seconds
       });
     }
   };
-  const [createStockGroup] = useCreateLedgerMutation();
+  const { data: purchaseVouchers = [] } = useGetPurchasesSomeQuery();
+  const [debitNote, setDebitNote] = useState({
+    debitLedgers: [{ ledgerId: "", ledgerName: "", amount: "" }],
+    creditLedgers: [{ ledgerId: "", ledgerName: "", amount: "" }],
+  });
+  const [selectedVoucherId, setSelectedVoucherId] = useState("");
+  console.log("date", purchaseVouchers);
+  useEffect(() => {
+    if (selectedVoucherId) {
+      const selectedVoucher = purchaseVouchers.find(
+        (voucher) => voucher._id === selectedVoucherId
+      );
+
+      if (selectedVoucher) {
+        const { _id, __v, ...filteredVoucher } = selectedVoucher;
+
+        setPurchaseData((prevData) => ({
+          ...filteredVoucher,
+          voucherType: "Purchase Voucher", // Automatically set voucherType to "Payment Voucher"
+          creditDueDate: new Date(filteredVoucher.creditDueDate)
+            .toISOString()
+            .split("T")[0],
+          transactionDate: new Date(filteredVoucher.transactionDate)
+            .toISOString()
+            .split("T")[0],
+          selectedOption: prevData.selectedOption, // Preserve the selected option
+        }));
+        const stockGroupNames = selectedVoucher.items
+          .map((item) => item.stockGroupName)
+          .filter(Boolean);
+
+        // Convert stockGroupNames into an object with index-based keys
+        const stockGroupNamesObject = stockGroupNames.reduce(
+          (acc, name, index) => {
+            acc[index] = name; // Store each name with its index as the key
+            return acc;
+          },
+          {}
+        );
+        setTaxDropdownState((prev) => ({
+          ...prev,
+          searchTerm: filteredVoucher.debitLedgers[0]?.ledgerName || "",
+        }));
+        // Update searchTerms with the transformed stockGroupNames
+        setSearchTerms((prev) => ({
+          ...prev,
+          ...stockGroupNamesObject, // Spread the transformed object into the state
+        }));
+        // Populate company names for display purposes
+        setPurchaseByName(filteredVoucher.purchasedBy?.companyName || "");
+        setPurchaseToName(filteredVoucher.purchasedTo?.companyName || "");
+      }
+    }
+  }, [selectedVoucherId, purchaseVouchers]);
+  useEffect(() => {
+    if (selectedVoucherId) {
+      const selectedVoucher = purchaseVouchers.find(
+        (voucher) => voucher._id === selectedVoucherId
+      );
+
+      if (selectedVoucher) {
+        const { _id, __v, ...filteredVoucher } = selectedVoucher;
+
+        setDebitNote((prevData) => ({
+          ...prevData,
+          ...filteredVoucher,
+        }));
+
+        // Update purchaseData state
+        setPurchaseData((prevData) => ({
+          ...prevData, // Preserve the existing state data
+          ...filteredVoucher, // Merge the voucher data
+          voucherType: "Indirect Debit Note", // Automatically set voucherType to "Debit Note"
+          creditDueDate: new Date(filteredVoucher.creditDueDate)
+            .toISOString()
+            .split("T")[0], // Format creditDueDate to "YYYY-MM-DD"
+          transactionDate: new Date(filteredVoucher.transactionDate)
+            .toISOString()
+            .split("T")[0], // Format transactionDate to "YYYY-MM-DD"
+          selectedOption: prevData.selectedOption, // Preserve the selected option
+        }));
+        setSearchTermCredit(filteredVoucher.creditLedgers[0]?.ledgerName || "");
+        setSearchTermDebit(filteredVoucher.debitLedgers[1]?.ledgerName || "");
+        // Populate company names for display purposes
+        setPurchaseByName(filteredVoucher.purchasedBy?.companyName || "");
+        setPurchaseToName(filteredVoucher.purchasedTo?.companyName || "");
+      }
+    }
+  }, [selectedVoucherId, purchaseVouchers]);
+  const [createStockGroup] = useCreateStockGroupMutation();
   const [createCompany] = useCreateCompanyMutation();
   const [createLedger] = useCreateLedgerMutation(); // Hook for creating new ledger
   const [localLedgerData, setLocalLedgerData] = useState([]); // Local ledger state for dropdown
@@ -290,43 +305,6 @@ const SalesVoucher = () => {
       console.error("Failed to create ledger:", error);
     }
   };
-  const [searchTerms, setSearchTerms] = useState({}); // Keep it as an object or convert to an array if preferred
-  console.log("searchTerms", searchTerms);
-  const handleStockSelect = (index, stock) => {
-    console.log("stock", stock);
-    // Set the stock name for the selected index
-    setSearchTerms((prev) => ({
-      ...prev,
-      [index]: stock.name,
-    }));
-
-    setPurchaseData((prevData) => {
-      const updatedItems = [...prevData.items];
-      updatedItems[index] = {
-        ...updatedItems[index],
-
-        stockName: stock.name,
-        stockId: stock._id,
-      };
-      return { ...prevData, items: updatedItems };
-    });
-
-    // Close the dropdown for the selected index
-    setIsDropdownOpen((prev) => ({
-      ...prev,
-      [index]: false,
-    }));
-  };
-  console.log("stockData", stockData);
-  const filteredStockData = (searchTerm) => {
-    // Ensure searchTerm is a string before proceeding
-    const term = typeof searchTerm === "string" ? searchTerm : "";
-
-    return stockData.filter((item) =>
-      item.name?.toLowerCase().includes(term.toLowerCase())
-    );
-  };
-
   const handleCompanyCreation = async (newLedgerData) => {
     try {
       const newLedger = await createCompany(newLedgerData).unwrap();
@@ -342,7 +320,7 @@ const SalesVoucher = () => {
       await createStockGroup(newStockGroupData).unwrap();
       toast.success("Stock group created successfully!");
       closeModal(); // Close the modal after successful creation
-      stockItemsrefetch();
+      stockrefetch();
     } catch (error) {
       toast.error(`Error: ${error.message}`);
     }
@@ -446,8 +424,9 @@ const SalesVoucher = () => {
     updatedItems[index] = { ...updatedItems[index], [name]: value };
 
     // Calculate the amount when rate or quantity changes
-    if (name === "rate") {
-      updatedItems[index].amount = updatedItems[index].rate * 1;
+    if (name === "rate" || name === "quantity") {
+      updatedItems[index].amount =
+        updatedItems[index].rate * updatedItems[index].quantity;
     }
 
     // Calculate the taxAmount when taxRate, rate, or quantity changes
@@ -470,20 +449,16 @@ const SalesVoucher = () => {
         {
           id: prevData.items.length + 1,
           serialNumber: (prevData.items.length + 1).toString(), // Increment serial number
-          stockName: "",
-
-          quantity: "",
-          rate: "",
-          amount: 0,
+          description: "",
           unit: "",
-          actualrate: "",
           hsnCode: "",
+          rate: 0,
+          quantity: 0,
           taxRate: "",
-          taxAmount: 0,
-
-          stockId: "",
-          subtotal: 0,
-          total: 0,
+          taxAmount: "",
+          amount: 0,
+          stockItem: "",
+          stockName: "", // Stock item dropdown
         },
       ],
     }));
@@ -497,9 +472,10 @@ const SalesVoucher = () => {
   };
 
   const handleLedgerSelect = (type, option) => {
+    console.log("option", option);
     if (type === "credit") {
-      setSearchTermCredit(option.name);
       // Handle credit ledger updates
+      setSearchTermCredit(option.name);
       setPurchaseData((prevData) => {
         const updatedCreditLedgers = [...prevData.creditLedgers];
 
@@ -534,6 +510,7 @@ const SalesVoucher = () => {
       }));
     } else if (type === "debit") {
       // Handle debit ledger updates
+      console.log("i am debit");
       setSearchTermDebit(option.name);
       setPurchaseData((prevData) => {
         const updatedDebitLedgers = [...prevData.debitLedgers];
@@ -548,6 +525,7 @@ const SalesVoucher = () => {
             amount: prevData.total || 0,
           };
         } else {
+          setSearchTermDebit(option.name);
           updatedDebitLedgers.push({
             ledgerId: option._id,
             ledgerName: option.name,
@@ -568,6 +546,41 @@ const SalesVoucher = () => {
         debit: false,
       }));
     }
+  };
+  const [searchTerms, setSearchTerms] = useState({}); // Keep it as an object or convert to an array if preferred
+  console.log("searchTerms", searchTerms);
+
+  const handleStockSelect = (index, stock) => {
+    console.log("stock", stock);
+
+    // Set the stock name for the selected index
+    setSearchTerms((prev) => ({
+      ...prev,
+      [index]: stock.name,
+    }));
+
+    setPurchaseData((prevData) => {
+      const updatedItems = [...prevData.items];
+      updatedItems[index] = {
+        ...updatedItems[index],
+        stockGroupName: stock.name,
+        stockGroup: stock._id,
+      };
+      return { ...prevData, items: updatedItems };
+    });
+
+    // Close the dropdown for the selected index
+    setIsDropdownOpen((prev) => ({
+      ...prev,
+      [index]: false,
+    }));
+  };
+  const filteredStockData = (searchTerm) => {
+    // Ensure searchTerm is a string before proceeding
+    const term = typeof searchTerm === "string" ? searchTerm : "";
+    return stockData.filter((item) =>
+      item.name?.toLowerCase().includes(term.toLowerCase())
+    );
   };
 
   const calculateTotals = () => {
@@ -637,17 +650,15 @@ const SalesVoucher = () => {
   const [taxDropdownState, setTaxDropdownState] = useState({
     isDropdownOpen: false,
     searchTerm: "",
+    selectedOption: null, // Add a selectedOption to store the selected tax option
   });
 
   const taxDropdownRef = useRef(null);
 
   // Handler for selecting a tax option
   const handleTaxSelect = (option) => {
-    setTaxDropdownState((prevState) => ({
-      ...prevState,
-      searchTerm: option.name, // Update the search term or selected value
-      isDropdownOpen: false, // Close the dropdown after selection
-    }));
+    console.log("options", option);
+
     setPurchaseData((prevState) => {
       // Calculate or retrieve the taxAmount
       const taxAmount = prevState.taxAmount; // Or calculate it if needed
@@ -668,11 +679,17 @@ const SalesVoucher = () => {
         creditLedgers: updatedCreditLedgers, // Set updated debitLedgers
       };
     });
+    setTaxDropdownState((prevState) => ({
+      ...prevState,
+      searchTerm: option.name, // Update the search term or selected value
+      isDropdownOpen: false, // Close the dropdown after selection
+    }));
 
     // Close the dropdown after selection
     setTaxDropdownState((prevState) => ({
       ...prevState,
-      isDropdownOpen: false,
+      searchTerm: option.name, // Update the search term or selected value
+      isDropdownOpen: false, // Close the dropdown after selection
     }));
   };
   // Filter tax data based on search term
@@ -681,6 +698,7 @@ const SalesVoucher = () => {
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+  console.log("pu", purchaseData);
   const [searchTermPurchasedBy, setSearchTermPurchasedBy] = useState("");
   const [searchTermPurchasedTo, setSearchTermPurchasedTo] = useState("");
   const handleSelect = (field, option) => {
@@ -707,29 +725,40 @@ const SalesVoucher = () => {
       [field]: !prevState[field],
     }));
   };
-  const filteredData = filteredStockData(searchTermStock); // Filtered data based on search term
-  const [isTrue, setIsTrue] = useState(false);
 
-  const handleClick = () => {
-    setIsTrue(!isTrue); // Toggle between true and false
-  };
   return (
-    <div className="p-2">
+    <div className="p-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+        <div className="flex items-center gap-4 ">
+          V/N
+          <p className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+            {purchaseData.voucherNumber}
+          </p>
+        </div>
+      </div>
       {/* form field  */}
       <form className="max-w-6xl mx-auto p-6 bg-gray-200 dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out mt-10 ">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {/* Row 1 */}
+
           <div className="flex flex-col">
             <label className="text-gray-700 dark:text-gray-300">
-              Voucher Number
+              Select Voucher Number
             </label>
-            <input
-              type="number"
-              name="voucherNumber"
-              value={purchaseData.voucherNumber}
-              readOnly
+            <select
+              value={selectedVoucherId}
+              onChange={(e) => setSelectedVoucherId(e.target.value)}
               className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
+            >
+              <option value="" disabled>
+                Select a voucher
+              </option>
+              {purchaseVouchers.map((voucher) => (
+                <option key={voucher._id} value={voucher._id}>
+                  {voucher.voucherNumber}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex flex-col">
             <label className="text-gray-700 dark:text-gray-300">
@@ -743,29 +772,27 @@ const SalesVoucher = () => {
               className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
-
           {/* Row 2 */}
 
+          {/* Row 3 */}
           <div className="flex flex-col">
             <label className="text-gray-700 dark:text-gray-300">
-              Invoice Number
+              Purchase Number
             </label>
             <input
               type="text"
-              name="saleInvoiceNumber"
-              value={purchaseData.saleInvoiceNumber}
+              name="purposeOfPayment"
+              value={purchaseData.purposeOfPayment}
               onChange={handleChange}
               className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
 
-          {/* Row 3 */}
-
           {/* Row 4 */}
           {/* Row 4 - Purchased By */}
           <div className="relative flex flex-col mb-4">
             <label className="text-gray-700 dark:text-gray-300 text-sm font-bold mb-1">
-              Shipped To
+              Purchased By
             </label>
             <input
               type="text"
@@ -806,7 +833,7 @@ const SalesVoucher = () => {
           {/* Row 4 - Purchased To */}
           <div className="relative flex flex-col mb-4">
             <label className="text-gray-700 dark:text-gray-300 text-sm font-bold mb-1">
-              Billeed To
+              Purchased To
             </label>
             <input
               type="text"
@@ -843,11 +870,63 @@ const SalesVoucher = () => {
               </div>
             )}
           </div>
-
-          {/* Tax Ledger */}
-          <div className="relative flex flex-col">
+          {/* Tax Amount */}
+          <div className="flex-1 min-w-[200px]">
             <label
-              className=" text-gray-700 dark:text-gray-300"
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="taxAmount"
+            >
+              Tax Amount
+            </label>
+            <input
+              type="number"
+              name="taxAmount"
+              id="taxAmount"
+              value={purchaseData.taxAmount || ""}
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
+
+          {/* Subtotal */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="subTotal"
+            >
+              Subtotal
+            </label>
+            <input
+              type="number"
+              name="subTotal"
+              id="subTotal"
+              value={purchaseData.subTotal || ""}
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
+
+          {/* Total */}
+          <div className="flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="total"
+            >
+              Total
+            </label>
+            <input
+              type="number"
+              name="total"
+              id="total"
+              value={purchaseData.total || ""}
+              readOnly
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-200"
+            />
+          </div>
+          {/* Tax Ledger */}
+          <div className="relative flex-1 min-w-[200px]">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
               htmlFor="taxLedger"
             >
               Tax Ledger
@@ -869,13 +948,12 @@ const SalesVoucher = () => {
                   searchTerm: e.target.value,
                 }))
               }
-              className="mt-1 p-2 bg-gray-100  dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
             {taxDropdownState.isDropdownOpen && (
               <div
                 ref={taxDropdownRef}
-                style={{ top: "100%", right: 0 }} // Position above the input
-                className="absolute mt-2 z-10 bg-white border border-gray-300  w-full dark:bg-gray-800 dark:border-gray-600 rounded-md shadow-sm dark:focus:ring dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
               >
                 <ul className="max-h-40 overflow-auto">
                   {filteredTaxData(taxDropdownState.searchTerm).length > 0 ? (
@@ -905,41 +983,41 @@ const SalesVoucher = () => {
               </div>
             )}
           </div>
-          {/* Credit Ledger */}
-          <div className="relative flex flex-col">
+
+          {/* Debit Ledger */}
+          <div className="relative flex-1 min-w-[200px]">
             <label
-              className=" text-gray-700 dark:text-gray-300"
-              htmlFor="creditLedger"
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="debitLedger"
             >
-              Credit Ledger
+              Debit Ledger
             </label>
             <input
               type="text"
-              name="creditLedger"
-              id="creditLedger"
-              value={searchTermCredit}
+              name="debitLedger"
+              id="debitLedger"
+              value={searchTermDebit}
               onClick={() =>
                 setIsDropdownOpen((prevState) => ({
                   ...prevState,
-                  credit: !prevState.debit,
+                  credit: !prevState.credit,
                 }))
               }
-              onChange={(e) => setSearchTermCredit(e.target.value)}
-              className="mt-1 p-2 bg-gray-100  dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+              onChange={(e) => setSearchTermDebit(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
             {isDropdownOpen.credit && (
               <div
                 ref={dropdownRefs.credit}
-                style={{ top: "100%", right: 0 }} // Position above the input
-                className="absolute mt-2 z-10 bg-white border border-gray-300  w-full dark:bg-gray-800 dark:border-gray-600 rounded-md shadow-sm dark:focus:ring dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
               >
                 <ul className="max-h-40 overflow-auto">
-                  {filteredLedgerData(searchTermCredit).length > 0 ? (
-                    filteredLedgerData(searchTermCredit).map((option) => (
+                  {filteredLedgerData(searchTermDebit).length > 0 ? (
+                    filteredLedgerData(searchTermDebit).map((option) => (
                       <li
                         key={option._id}
                         onClick={() => {
-                          handleLedgerSelect("credit", option);
+                          handleLedgerSelect("debit", option);
                           setIsDropdownOpen((prevState) => ({
                             ...prevState,
                             credit: false,
@@ -959,41 +1037,40 @@ const SalesVoucher = () => {
               </div>
             )}
           </div>
-          {/* Debit Ledger */}
-          <div className="relative flex flex-col">
+          {/* Credit Ledger */}
+          <div className="relative flex-1 min-w-[200px]">
             <label
-              className=" text-gray-700 dark:text-gray-300"
-              htmlFor="debitLedger"
+              className="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-300"
+              htmlFor="creditLedger"
             >
-              Debit Ledger
+              Credit Ledger
             </label>
             <input
               type="text"
-              name="debitLedger"
-              id="debitLedger"
-              value={searchTermDebit}
+              name="creditLedger"
+              id="creditLedger"
+              value={searchTermCredit}
               onClick={() =>
                 setIsDropdownOpen((prevState) => ({
                   ...prevState,
                   debit: !prevState.debit,
                 }))
               }
-              onChange={(e) => setSearchTermDebit(e.target.value)}
-              className="mt-1 p-2 bg-gray-100  dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+              onChange={(e) => setSearchTermCredit(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-pointer dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
             {isDropdownOpen.debit && (
               <div
                 ref={dropdownRefs.debit}
-                className="absolute mt-2 z-10 bg-white border border-gray-300 rounded mb-1 w-full dark:bg-gray-800 dark:border-gray-600"
-                style={{ top: "100%", right: 0 }} // Position above the input
+                className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full dark:bg-gray-800 dark:border-gray-600"
               >
                 <ul className="max-h-40 overflow-auto">
-                  {filteredLedgerData(searchTermDebit).length > 0 ? (
-                    filteredLedgerData(searchTermDebit).map((option) => (
+                  {filteredLedgerData(searchTermCredit).length > 0 ? (
+                    filteredLedgerData(searchTermCredit).map((option) => (
                       <li
                         key={option._id}
                         onClick={() => {
-                          handleLedgerSelect("debit", option);
+                          handleLedgerSelect("credit", option);
                           setIsDropdownOpen((prevState) => ({
                             ...prevState,
                             debit: false,
@@ -1013,70 +1090,20 @@ const SalesVoucher = () => {
               </div>
             )}
           </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">
-              Tax Amount
-            </label>
-            <input
-              type="number"
-              name="taxAmount"
-              id="taxAmount"
-              value={
-                typeof purchaseData.taxAmount === "number"
-                  ? purchaseData.taxAmount.toFixed(2)
-                  : "0.00"
-              }
-              readOnly
-              className="mt-1 p-2 bg-gray-100 appearance-none cursor-not-allowed dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">Subtotal</label>
-            <input
-              type="number"
-              name="subTotal"
-              id="subTotal"
-              value={
-                typeof purchaseData.subTotal === "number"
-                  ? purchaseData.subTotal.toFixed(2)
-                  : "0.00"
-              }
-              readOnly
-              className="mt-1 p-2 bg-gray-100 appearance-none cursor-not-allowed dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-gray-700 dark:text-gray-300">Total</label>
-            <input
-              type="number"
-              name="total"
-              id="total"
-              value={
-                typeof purchaseData.total === "number"
-                  ? purchaseData.total.toFixed(2)
-                  : "0.00"
-              }
-              readOnly
-              className="mt-1 p-2 bg-gray-100 appearance-none cursor-not-allowed dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
         </div>
       </form>
-      {/* ithu main table container*/}
 
       {/* Table container */}
-      <div className="hidden lg:block mt-10  dark:border-slate-50 dark:border-2 dark:rounded-lg">
+      <div className="hidden lg:block mt-10">
         <div className="">
-          <table className="min-w-full bg-white  dark:bg-gray-800">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 {[
-                  "Item Descriptions",
+                  " StokName",
                   "HSN Code",
-                  "Unit",
-                  "Acutal Rate",
-
                   "Rate",
+                  "Quantity",
 
                   "Tax Rate", // Added Tax Rate header
                   "Tax Amount", // Added Tax Amount header
@@ -1087,67 +1114,27 @@ const SalesVoucher = () => {
                   <th
                     key={header}
                     scope="col"
-                    className="py-2 px-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
                   >
                     {header}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className=" dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {purchaseData.items.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className="text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchTerms[index] || ""} // Use empty string if undefined
-                        onClick={() =>
-                          setIsDropdownOpen((prev) => ({
-                            ...prev,
-                            [index]: !prev[index],
-                          }))
-                        }
-                        onChange={(e) => {
-                          // Update the search term for the specific index
-                          setSearchTerms((prev) => ({
-                            ...prev,
-                            [index]: e.target.value, // Correctly set the current value
-                          }));
-                        }}
-                        className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                      />
-                      {isDropdownOpen[index] && (
-                        <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto dark:bg-gray-800 dark:text-white">
-                          {filteredStockData(searchTerms[index] || "").length >
-                          0 ? (
-                            filteredStockData(searchTerms[index] || []).map(
-                              (option) => (
-                                <li
-                                  key={option._id}
-                                  onClick={() =>
-                                    handleStockSelect(index, option)
-                                  }
-                                  className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                                >
-                                  {option.name}
-                                </li>
-                              )
-                            )
-                          ) : (
-                            <li className="px-4 py-2 text-gray-500 dark:text-gray-400">
-                              No data
-                            </li>
-                          )}
-                        </ul>
-                      )}
-                    </div>
+                <tr key={item.id} className="text-sm">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <input
+                      type="text"
+                      value={item.stockName}
+                      onChange={(e) =>
+                        handleItemChange(index, "stockName", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
                   </td>
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <input
                       type="text"
                       value={item.hsnCode}
@@ -1157,28 +1144,7 @@ const SalesVoucher = () => {
                       className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                     />
                   </td>
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="text"
-                      value={item.unit}
-                      onChange={(e) =>
-                        handleItemChange(index, "unit", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-                    <input
-                      type="text"
-                      value={item.actualrate}
-                      onChange={(e) =>
-                        handleItemChange(index, "actualrate", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    />
-                  </td>
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <input
                       type="number"
                       value={item.rate}
@@ -1188,9 +1154,19 @@ const SalesVoucher = () => {
                       className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                     />
                   </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleItemChange(index, "quantity", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    />
+                  </td>
 
                   {/* Tax Rate Field */}
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <input
                       type="number"
                       value={item.taxRate}
@@ -1202,27 +1178,27 @@ const SalesVoucher = () => {
                   </td>
 
                   {/* Tax Amount Field */}
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <input
                       type="number"
                       value={
                         item.taxAmount || (item.taxRate * item.amount) / 100
                       }
                       readOnly
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                      className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
                     />
                   </td>
 
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <input
                       type="number"
                       value={item.amount}
                       readOnly
-                      className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                      className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
                     />
                   </td>
 
-                  <td className=" p-1 whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <button
                       onClick={() => deleteItem(index)}
                       className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800"
@@ -1243,10 +1219,21 @@ const SalesVoucher = () => {
             key={item.id}
             className="border-b border-gray-200 dark:border-gray-700 mb-4 p-4"
           >
-            {/* Stock Items Dropdown */}
-            <div className="font-bold mb-2 mt-4  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white">
-              Stock Items
+            {/* Stock Name Input */}
+            <div className="font-bold mb-2">
+              Stock Name
+              <input
+                type="text"
+                value={item.stockName}
+                onChange={(e) =>
+                  handleItemChange(index, "stockName", e.target.value)
+                }
+                className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              />
             </div>
+
+            {/* Stock Items Dropdown */}
+            <div className="font-bold mb-2 mt-4">Stock Items</div>
             <div className="relative">
               <input
                 type="text"
@@ -1265,20 +1252,18 @@ const SalesVoucher = () => {
                     [index]: e.target.value, // Correctly set the current value
                   }));
                 }}
-                className="w-full px-2 py-1 border rounded  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white"
+                className="w-full px-2 py-1 border rounded"
               />
               {isDropdownOpen[index] && (
-                <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto  whitespace-nowrap  dark:bg-gray-800 dark:text-white">
+                <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto">
                   {filteredStockData(searchTerms[index] || "").length > 0 ? (
                     filteredStockData(searchTerms[index] || []).map(
                       (option) => (
                         <li
                           key={option._id}
                           onClick={() => handleStockSelect(index, option)}
-                          className="px-4 py-2 cursor-pointer hover:bg-gray-200  whitespace-nowrap bg-white dark:bg-gray-800 dark:text-white"
+                          className="px-4 py-2 cursor-pointer hover:bg-gray-200"
                         >
-                          {" "}
-                          {console.log("option", option.name)}
                           {option.name}
                         </li>
                       )
@@ -1291,6 +1276,23 @@ const SalesVoucher = () => {
             </div>
 
             {/* Other Input Fields */}
+            <div className="font-bold mb-2 mt-4">Description</div>
+            <input
+              type="text"
+              value={item.description}
+              onChange={(e) =>
+                handleItemChange(index, "description", e.target.value)
+              }
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+
+            <div className="font-bold mb-2 mt-4">Unit</div>
+            <input
+              type="text"
+              value={item.unit}
+              onChange={(e) => handleItemChange(index, "unit", e.target.value)}
+              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
 
             <div className="font-bold mb-2 mt-4">HSN Code</div>
             <input
@@ -1302,15 +1304,6 @@ const SalesVoucher = () => {
               className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
 
-            <div className="font-bold mb-2 mt-4">Actual Rate</div>
-            <input
-              type="number"
-              value={item.actualrate}
-              onChange={(e) =>
-                handleItemChange(index, "actualrate", e.target.value)
-              }
-              className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            />
             <div className="font-bold mb-2 mt-4">Rate</div>
             <input
               type="number"
@@ -1408,7 +1401,7 @@ const SalesVoucher = () => {
         {isModalOpen && (
           <CreateCompanyModal
             closeModal={closeModal}
-            onCompanyCreate={handleCompanyCreation} // correct spelling here
+            onComapnyCreate={handleCompanyCreation}
             isLoading={isLoading}
             themeMode="dark"
           />
@@ -1428,271 +1421,17 @@ const SalesVoucher = () => {
             createStockGroup={handleStockCreation}
           />
         )}
-        {/* Submit Button */}
-        <div className="my-10">
-          <button
-            type="button"
-            onClick={handleSaveAndSubmit}
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-blue-700"
-            disabled={isLoading}
-          >
-            {isLoading ? "Saved..." : "Save"}
-          </button>
-        </div>
         <button
-          onClick={openModalAsk} // On button click, open the modal
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2"
+          type="button"
+          onClick={handleSaveAndSubmit}
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-blue-700"
+          disabled={isLoading}
         >
-          Any Help
+          {isLoading ? "Saved..." : "Save"}
         </button>
-
-        {askHelp && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70 overflow-y-auto">
-            <div className="bg-white lg:mr-24 rounded-lg p-6 md:p-8 max-w-lg md:max-w-6xl mx-auto relative shadow-lg border border-blue-300">
-              <button
-                onClick={closeModalAsk} // Close modal when "Thank You" is clicked
-                className="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
-              >
-                Thank You
-              </button>
-              <h2 className="text-xl font-bold text-center mb-4 text-blue-600 tracking-wide">
-                Information Guide
-              </h2>
-              <div className="overflow-y-auto max-h-[70vh]">
-                {" "}
-                {/* Limit height for scrolling */}
-                <p className="text-sm mb-4 leading-relaxed tracking-wide">
-                  <span className="font-semibold">Shipped To:</span>
-                  ഇവിടെ Shipped To കൊണ്ട് ഉദേശിക്കുന്നത് നിങ്ങൾ Invoice
-                  കൊടുക്കുമ്പോൾ അവിടെ Shipped To എന്ന ഭാഗത്തു ഏതു company name
-                  വയ്ക്കണമോ അത് കൊടുക്കണം. അതായതു നിങ്ങൾ ഒരു സേവനം നൽകി അതിന്റെ
-                  ശമ്പളം തരേണ്ട കമ്പനി പേര് .
-                </p>
-                <p className="text-sm mb-4 leading-relaxed tracking-wide">
-                  <span className="font-semibold">Billed To:</span>
-                  ഇവിടെ Billed To കൊണ്ട് ഉദ്ദേശിക്കുന്നത് നിങ്ങൾ Invoice
-                  കൊടുക്കുമ്പോൾ അവിടെ Billed To എന്ന ഭാഗത്തു ഏതു company name
-                  വയ്ക്കണമോ അത് കൊടുക്കണം.അതായതു നിങ്ങൾ ഒരു സേവനം നൽകി അതിന്റെ
-                  ശമ്പളം തരേണ്ട കമ്പനി പേരിനു മറ്റെന്തെങ്കിലും സബ്ഡിവിഷൻ
-                  ഉണ്ടെങ്കിൽ അതും കൊടുക്കാം
-                </p>
-                <p className="text-sm mb-4 leading-relaxed tracking-wide">
-                  <span className="font-semibold">Tax Ledger:</span> ഇവിടെ Tax
-                  Ledger കൊണ്ട് ഉദ്ദേശിക്കുന്നത് നമ്മൾ ഒരു സേവനം ( നമ്മുടെ
-                  വാഹനങ്ങൾ വാടകയ്ക്കു നൽകുന്നത് ) ഒരാൾക്ക് നൽകുമ്പോൾ അയാൾ ആ
-                  സേവനത്തിനു തരുന്ന GST രേഖപ്പെടുത്തണം . ആ GST Duties & Tax
-                  കീഴിൽ കൊടുക്കണം . ഇവിടെ GST നൽകുന്ന പേര് നിങ്ങൾക്കു
-                  ഇഷ്ടമുള്ളത് കൊടുക്കാം . sales gst, under 18% gst ,output gst
-                  ഇങ്ങനെ നിങ്ങൾക്കു ഇഷ്ടമുള്ള പേര് കൊടുക്കാം പക്ഷെ Duties % tax
-                  കീഴിൽ മാത്രമേ വരവ് .
-                </p>
-                <p className="text-sm mb-4 leading-relaxed tracking-wide">
-                  <span className="font-semibold">Debit Ledger:</span>
-                  ഇവിടെ Debit Ledger കൊണ്ട് ഉദ്ദേശിക്കുന്നത് നമ്മൾ ഒരു സേവനം
-                  നൽകുമ്പോൾ ആ സമയം തന്നെ പൈസ തരാം അല്ലെങ്കിൽ ബാങ്ക് വഴി തരാം
-                  അല്ലെങ്കിൽ കടം വയ്ക്കുമായിരിക്കും . പൈസ തന്നാലും ബാങ്കിൽ
-                  തന്നാലും അത് നമ്മൾ Debit Ledger ഭാഗത്തു രേഖപ്പെടുത്തണം .ഇനി
-                  കടം ആണ് വൈകുന്നതെങ്കിൽ ആരാണോ അല്ലെങ്കിൽ ഏതു സ്ഥാപനമാണോ കടം
-                  വയ്ക്കുന്നത് അവരെ Sundry Debtor കീഴിൽ വയ്ക്കുകയും Debit Ledger
-                  ഭാഗത്തു രേഖപ്പെടുത്തുകയും വേണം .
-                </p>
-                <p className="text-sm mb-4 leading-relaxed tracking-wide">
-                  <span className="font-semibold">Credit Ledger:</span>
-                   Credit Ledger കൊണ്ട് ഉദ്ദേശിക്കുന്നത് നമ്മൾ നൽകുന്ന സേവനം
-                  കമ്പനിയിൽ ഒരു വരുമാനമായിട്ടാണ് വരുന്നതെങ്കിലും കമ്പനിക്കു
-                  അതൊരു ബാദ്യതയാണ് . അത് കൊണ്ട് അതിനെ Credit Ledger ഭാഗത്തു
-                  വയ്ക്കണം . ഉദാഹരണത്തിന് നമ്മൾ വാടകയ്ക്കു കൊടുക്കുന്ന വാഹനം ആണ്
-                  നമ്മുടെ വരുമാനം അത് കൊണ്ട് അതിനെ Credit Ledger ഈ ഭാഗത്തു Sales
-                  Accounts കീഴിൽ വയ്ക്കണം .
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-
-      {isSuccess && (
-        <p className="text-green-500">Purchase created successfully!</p>
-      )}
-      {isError && (
-        <p className="text-red-500">
-          Failed to create purchase: {error.message}
-        </p>
-      )}
     </div>
   );
 };
 
-export default SalesVoucher;
-
-// <div className="mt-10">
-//   {purchaseData.items.map((item, index) => (
-//     <div
-//       key={item.id}
-//       className="border-b border-gray-200 dark:border-gray-700 mb-4 p-4"
-//     >
-//       {/* Row 1: Stock Item, Stock Group, HSN Code */}
-//       <div className="grid grid-cols-3 gap-4">
-//         {/* Stock Item Dropdown */}
-//         <div>
-//           <label className="font-bold mb-2">Stock Items</label>
-//           <div className="relative">
-//             <input
-//               type="text"
-//               placeholder="Search..."
-//               value={searchTerms[index] || ""}
-//               onClick={() =>
-//                 setIsDropdownOpen((prev) => ({
-//                   ...prev,
-//                   [index]: !prev[index],
-//                 }))
-//               }
-//               onChange={(e) =>
-//                 setSearchTerms((prev) => ({
-//                   ...prev,
-//                   [index]: e.target.value,
-//                 }))
-//               }
-//               className="w-full px-2 py-1 border rounded bg-white dark:bg-gray-800 dark:text-white"
-//             />
-//             {isDropdownOpen[index] && (
-//               <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto dark:bg-gray-800 dark:text-white">
-//                 {filteredStockData(searchTerms[index] || "").length > 0 ? (
-//                   filteredStockData(searchTerms[index] || []).map((option) => (
-//                     <li
-//                       key={option._id}
-//                       onClick={() => handleStockSelect(index, option)}
-//                       className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-//                     >
-//                       {option.stockName}
-//                     </li>
-//                   ))
-//                 ) : (
-//                   <li className="px-4 py-2 text-gray-500">No data</li>
-//                 )}
-//               </ul>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Stock Group */}
-//         <div>
-//           <label className="font-bold mb-2">Stock Group</label>
-//           <input
-//             type="text"
-//             value={item.stockGroup}
-//             onChange={(e) =>
-//               handleItemChange(index, "stockGroup", e.target.value)
-//             }
-//             className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-//           />
-//         </div>
-
-//         {/* HSN Code */}
-//         <div>
-//           <label className="font-bold mb-2">HSN Code</label>
-//           <input
-//             type="text"
-//             value={item.hsnCode}
-//             onChange={(e) =>
-//               handleItemChange(index, "hsnCode", e.target.value)
-//             }
-//             className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-//           />
-//         </div>
-//       </div>
-
-//       {/* Row 2: Rate, Quantity, Tax Rate */}
-//       <div className="grid grid-cols-3 gap-4 mt-4">
-//         <div>
-//           <label className="font-bold mb-2">Rate</label>
-//           <input
-//             type="number"
-//             value={item.rate}
-//             onChange={(e) => handleItemChange(index, "rate", e.target.value)}
-//             className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="font-bold mb-2">Quantity</label>
-//           <input
-//             type="number"
-//             value={item.quantity}
-//             onChange={(e) =>
-//               handleItemChange(index, "quantity", e.target.value)
-//             }
-//             className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="font-bold mb-2">Tax Rate (%)</label>
-//           <input
-//             type="number"
-//             value={item.taxRate}
-//             onChange={(e) =>
-//               handleItemChange(index, "taxRate", e.target.value)
-//             }
-//             className="w-full px-2 py-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-//           />
-//         </div>
-//       </div>
-
-//       {/* Row 3: Tax Amount, Amount, Actions */}
-//       <div className="grid grid-cols-3 gap-4 mt-4">
-//         <div>
-//           <label className="font-bold mb-2">Tax Amount</label>
-//           <input
-//             type="number"
-//             value={item.taxAmount || (item.taxRate * item.amount) / 100}
-//             readOnly
-//             className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="font-bold mb-2">Amount</label>
-//           <input
-//             type="number"
-//             value={item.amount}
-//             readOnly
-//             className="w-full px-2 py-1 border rounded bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
-//           />
-//         </div>
-
-//         <div className="flex justify-end space-x-2">
-//           <button
-//             onClick={openModali}
-//             className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-//           >
-//             <FaPlus className="mr-2" />
-//             Stock Group
-//           </button>
-
-//           {isModalOpeni && (
-//             <CreateStockModal
-//               onClose={closeModali}
-//               createStockGroup={handleStockCreation}
-//             />
-//           )}
-
-//           <button
-//             onClick={addItem}
-//             className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800"
-//           >
-//             <FaPlus className="mr-2" />
-//             Add Item
-//           </button>
-
-//           <button
-//             onClick={() => deleteItem(index)}
-//             className="flex items-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 dark:bg-red-400 dark:hover:bg-red-600"
-//           >
-//             Delete
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   ))}
-// </div>
+export default IndirectDreditNote;

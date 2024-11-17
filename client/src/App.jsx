@@ -153,9 +153,7 @@ import PayMasterViewEdit from "./AllLedgerViewAdnEdit/PayMasterViewEdit";
 
 import VehicleRentEdit from "./Staffmanagement/VehicleRentEdit";
 import useTheme from "./context/Theme";
-import Kumar from "./Freindend/kumar.";
-import CustomerManagement from "./invoice/CustomerManagement";
-import GetCustomer from "./invoice/GetCustomer";
+import IndirectDreditNote from "./CreditNotee/IndirectDreditNote";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { themeMode } = useTheme();
@@ -178,7 +176,7 @@ function App() {
           <SalaryProvider>
             <AuthProvider>
               <Routes>
-                <Route path="/" element={<Kumar />} />
+                <Route path="/" element={<Loader />} />
                 <Route path="/login" element={<Login />} />
 
                 <Route path="/register" element={<Register />} />
@@ -331,6 +329,10 @@ function App() {
                     <Route path="contravoucher" element={<ContraVoucher />} />
                     <Route path="creditnote" element={<CreditNoteee />} />
                     <Route path="debitnote" element={<DebitNoteee />} />
+                    <Route
+                      path="indirectdebitnote"
+                      element={<IndirectDreditNote />}
+                    />
                   </Route>
                 </Route>
                 <Route
@@ -494,11 +496,6 @@ function App() {
                     <Route index element={<ItemsHome />} />
                     <Route path="invoice-preview" element={<ItemsMain />} />
                     <Route path="invoice/edit/:id" element={<InvoiceEdit />} />
-                    <Route
-                      path="customerManagement"
-                      element={<CustomerManagement />}
-                    />
-                    <Route path="getCustomer" element={<GetCustomer />} />
                   </Route>
                 </Route>
                 <Route

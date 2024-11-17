@@ -13,19 +13,22 @@ const EmployeeDetail = () => {
     data: employee,
     isLoading,
     error,
+    refetch,
   } = useGetEmployeeDetailsByIdQuery(employeeId);
   console.log("employee", employee);
   const [deleteEmployee] = useDeleteEmployeeByIdMutation();
 
   const [formData, setFormData] = useState({});
-
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   useEffect(() => {
     if (employee) {
-      console.log("employee", employee.name);
+      console.log("employee", employee);
       if (employee.registrationType === "vehicle") {
         setFormData({
           vehicleRegistrationNumber: employee.vehicleRegistrationNumber,
-          ownerName: employee.ownerName,
+          ownerName: employee.userName,
           vehicleType: employee.vehicleType,
           rentalStartDate: employee.rentalStartDate,
           ownerAddress: employee.ownerAddress,
@@ -35,7 +38,7 @@ const EmployeeDetail = () => {
         });
       } else {
         setFormData({
-          name: employee.name,
+          ownerName: employee.name,
           position: employee.designation,
           email: employee.contact.email,
           phone: employee.contact.phone,
@@ -96,7 +99,7 @@ const EmployeeDetail = () => {
         <div className="flex items-center space-x-6 mb-6">
           <img
             src={employee.avatar || "https://via.placeholder.com/100"}
-            alt={employee.name || formData.ownerName}
+            alt={employee.userName || formData.ownerName}
             className="w-24 h-24 object-cover rounded-full border border-gray-600 dark:border-gray-400"
           />
           <div>
@@ -104,13 +107,13 @@ const EmployeeDetail = () => {
               className="text-3xl font-bold text-gray-900 dark:text-gray-100"
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
-              {formData.ownerName || employee.name}
+              {formData.ownerName || employee.userName}
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               For Company: {formData.registrationType || "Owner of Vehicle"}
             </p>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Employee ID: {formData.employeeId || "Owner of Vehicle"}
+              Employee ID: {employee.employeeId || "Owner of Vehicle"}
             </p>
           </div>
         </div>
@@ -129,7 +132,7 @@ const EmployeeDetail = () => {
             {/* Left Column */}
             <div>
               <div>
-                <p>Name: {formData.ownerName || employee.name}</p>
+                <p>Name: {formData.name || employee.userName}</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {employee.dateOfBirth
                     ? `Date of Birth: ${new Date(
@@ -272,172 +275,3 @@ const EmployeeDetail = () => {
 };
 
 export default EmployeeDetail;
-
-// {employee.registrationType === "vehicle" ? (
-//   <>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Vehicle Registration Number:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.vehicleRegistrationNumber}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Owner Name:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.ownerName}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Vehicle Type:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.vehicleType}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Rental Start Date:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {new Date(formData.rentalStartDate).toLocaleDateString()}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Owner Address:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.ownerAddress}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         GST:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.gst}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         PAN:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.pan}
-//       </p>
-//     </div>
-//   </>
-// ) : (
-//   <>
-//     <div>
-//       <p> Name: {formData.ownerName || employee.name}</p>
-//       <p className="text-sm text-gray-600 dark:text-gray-400">
-//         {employee.dateOfBirth
-//           ? `Date of Birth: ${new Date(
-//               employee.dateOfBirth
-//             ).toLocaleDateString()}`
-//           : employee.registrationType === "vehicle" &&
-//             employee.rentalStartDate
-//           ? `Rental Start Date: ${new Date(
-//               employee.rentalStartDate
-//             ).toLocaleDateString()}`
-//           : "N/A"}
-//       </p>
-//       <p className="text-sm text-gray-600 dark:text-gray-400">
-//         Gender: {employee.gender || "N/A"}
-//       </p>
-//       <p className="text-sm text-gray-600 dark:text-gray-400">
-//         bloodGroup: {employee.bloodGroup || "N/A"}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100 gap-4">
-//         Email: <span className="ml-2">{formData.email}</span>
-//       </p>
-
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Phone:<span className="ml-2"> {formData.phone}</span>
-//       </p>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         aadhaarCard:
-//         <span className="ml-2"> {formData.aadhaarCard}</span>
-//       </p>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         incomeTaxPAN:
-//         <span className="ml-2"> {formData.incomeTaxPAN}</span>
-//       </p>
-//     </div>
-
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Address:
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         {formData.address}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Compnany Details
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         dateOfHire :{" "}
-//         {employee.dateOfHire
-//           ? ` ${new Date(
-//               employee.dateOfBirth
-//             ).toLocaleDateString()}`
-//           : employee.registrationType === "vehicle" &&
-//             employee.rentalStartDate
-//           ? ` ${new Date(
-//               employee.rentalStartDate
-//             ).toLocaleDateString()}`
-//           : "N/A"}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         designation: {formData.designation}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         PF number: {formData.pfAccountNumber}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         PR number: {formData.prAccountNumber}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         ESI number: {formData.esiNumber}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Family
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         Mother/Father: {formData.mother}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         spouseName: {formData.spouse}
-//       </p>
-//     </div>
-//     <div>
-//       <p className="font-semibold text-gray-900 dark:text-gray-100">
-//         Bank Details
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         Bank Name : {formData.bankName}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         Branch Name: {formData.branchName || ""}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         Account Number : {formData.accountNumber || ""}
-//       </p>
-//       <p className="text-gray-700 dark:text-gray-400">
-//         IFSC : {formData.ifscCode || ""}
-//       </p>
-//     </div>
-//   </>
-// )}

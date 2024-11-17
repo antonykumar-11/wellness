@@ -174,7 +174,6 @@ import { monthProfitApi } from "./api/MonthProfitApi"; // Corrected import
 import { servicePurchaseApi } from "./api/ServicePurchaseApi"; // Corrected import
 import { SalesServiceApi } from "./api/SalesServiceApi"; // Corrected import
 import { AssetApiSlice } from "./api/SalaryDisplayApi"; // Corrected import
-import { customerApi } from "./api/CustomerAPi"; // Corrected import
 
 export const store = configureStore({
   reducer: {
@@ -219,7 +218,6 @@ export const store = configureStore({
     [servicePurchaseApi.reducerPath]: servicePurchaseApi.reducer, // Fixed reducer path
     [SalesServiceApi.reducerPath]: SalesServiceApi.reducer, // Fixed reducer path
     [AssetApiSlice.reducerPath]: AssetApiSlice.reducer, // Fixed reducer path
-    [customerApi.reducerPath]: customerApi.reducer, // Fixed reducer path
 
     cart: cartReducer,
   },
@@ -265,8 +263,7 @@ export const store = configureStore({
       monthProfitApi.middleware, // Fixed middleware path
       servicePurchaseApi.middleware, // Fixed middleware path
       SalesServiceApi.middleware, // Fixed middleware path
-      AssetApiSlice.middleware,
-      customerApi.middleware
+      AssetApiSlice.middleware
     ),
 });
 

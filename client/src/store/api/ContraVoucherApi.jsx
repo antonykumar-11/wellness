@@ -19,6 +19,10 @@ export const contraVouchersApi = createApi({
     getContraVouchers: builder.query({
       query: () => "contra-vouchers",
     }),
+    checkVoucherNumber: builder.query({
+      query: () => "contra-vouchers/check",
+    }),
+
     getContraVoucherById: builder.query({
       query: (id) => `contra-vouchers/${id}`,
     }),
@@ -46,6 +50,7 @@ export const contraVouchersApi = createApi({
 });
 
 export const {
+  useCheckVoucherNumberQuery,
   useGetContraVouchersQuery,
   useGetContraVoucherByIdQuery,
   useCreateContraVoucherMutation,

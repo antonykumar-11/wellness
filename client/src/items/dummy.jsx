@@ -1,427 +1,553 @@
-import { useState } from "react";
-import { useCreateInvoiceMutation } from "../store/api/InvoicesApi";
+import React from "react";
+import { useGetAllInvoicesQuery } from "../store/api/InvoicesApi";
+import {
+  StyleSheet,
+  Document,
+  Page,
+  Text,
+  Font,
+  View,
+  Image,
+} from "@react-pdf/renderer";
+import convertNumberToWords from "./convertNumberToWords";
+import Logo from "../assets/file.png"; // Ensure the image is imported correctly
+// Register custom fonts
+Font.register({
+  family: "Poppins",
+  fonts: [
+    { src: "/fonts/Poppins-Regular.ttf", fontWeight: "normal" },
+    { src: "/fonts/Poppins-Bold.ttf", fontWeight: "bold" },
+    { src: "/fonts/Poppins-Italic.ttf", fontStyle: "italic" },
+    {
+      src: "/fonts/Poppins-BoldItalic.ttf",
+      fontWeight: "bold",
+      fontStyle: "italic",
+    },
+  ],
+});
+const colors = {
+  primary: "#0000ff", // Blue color for the primary variable
+  secondary: "#3d3d3d",
+  white: "#fff",
+};
+const styles = StyleSheet.create({
+  global: {
+    margin: 0,
+    padding: 0,
+    boxSizing: "border-box", // This applies to borders within the PDF elements
+    fontFamily: "Lato",
+  },
+  body: {
+    backgroundColor: colors.white, // Apply white background
+    padding: 30, // Apply 30px padding on all sides
+  },
 
-const InvoiceForm = ({ onSubmit, onInvoiceCreated }) => {
-  const [formData, setFormData] = useState({
-    billedTo: { line1: "", line2: "", line3: "", line4: "", line5: "" },
-    shippedTo: { line1: "", line2: "", line3: "", line4: "", line5: "" },
-    companyAddress: { line1: "", line2: "", line3: "", line4: "", line5: "" },
-    companyName: "",
-    image: "",
-    imagePosition: "left",
-    taxRate: "",
-    declaration: "",
-    managingDirector: "",
-    signature: "",
-    taxInvoice: "",
-    items: [
-      {
-        SerialNumber: "",
-        description: "",
-        hsnCode: "",
-        unit: "",
-        price: "",
-        qty: "",
-      },
-    ],
-    panNo: "",
-    gstNo: "",
-    invoiceNo: "",
-    date: "",
-    bankDetails: { name: "", accountNumber: "", ifsc: "", branch: "" },
+  page: {
+    flexDirection: "column",
+    backgroundColor: colors.white,
+    padding: 35, // Padding for the entire page
+  },
+  invoiceHeader: {
+    flexDirection: "row", // Align items horizontally
+    justifyContent: "space-between", // Space between the text and the logo
+    alignItems: "center", // Center items vertically
+  },
+  invoiceTitle: {
+    textAlign: "left", // Align text to the left
+    fontSize: 16, // Adjust font size as needed
+    fontWeight: "bold", // Optional bold styling
+    lineHeight: 1.5, // Adjust line height for better readability
+    fontFamily: "Poppins",
+
+    color: "#2d3748",
+  },
+  invoiceCompanyDetails: {
+    marginTop: 5, // Add some space between the title and the details
+  },
+  invoiceCompanyDetailsText: {
+    fontSize: 10, // Adjust font size for address details
+    textAlign: "left", // Align text to the left
+    lineHeight: 1.4, // Adjust line height for the address text
+  },
+  invoiceLogo: {
+    width: 100, // Ensure this matches the height for a square image
+    height: 100, // Ensure this matches the width for a square image
+    objectFit: "cover", // Use cover to fill the square without stretching
+    borderRadius: "50%", // Use 50% for a perfect circle
+    position: "absolute", // Keep it positioned as desired
+    right: 0, // Align to the right side
+  },
+
+  invoiceTaxTitle: {
+    textAlign: "center",
+    marginBottom: 12,
+    fontSize: 14,
+    fontFamily: "Poppins",
+    fontWeight: "bold",
+    color: "#2d3748",
+  },
+
+  invoiceDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 32,
+  },
+  invoiceDetailsText: {
+    fontSize: 10, // Adjust font size for address details
+    textAlign: "left", // Align text to the left
+    lineHeight: 1.4, // Adjust line height for the address text
+  },
+  invoiceAddresses: {
+    marginBottom: 32,
+  },
+  invoiceAddressesFlex: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  invoiceAddress: {
+    marginBottom: 24,
+  },
+  invoiceAddressTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+
+    marginBottom: 4,
+    textAlign: "center",
+
+    fontFamily: "Poppins",
+
+    color: "#2d3748",
+  },
+  invoiceItems: {
+    marginBottom: 20,
+  },
+  tableContainer: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderStyle: "solid",
+    borderCollapse: "collapse",
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableCellHeader: {
+    flex: 1,
+    padding: 8,
+    backgroundColor: "#E5E7EB",
+    borderRightWidth: 1,
+    borderRightColor: "#D1D5DB",
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  tableCellDescriptionHeader: {
+    flex: 2,
+    padding: 8,
+    backgroundColor: "#E5E7EB",
+    borderRightWidth: 1,
+    borderRightColor: "#D1D5DB",
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  tableCell: {
+    flex: 1,
+    padding: 8,
+    borderRightWidth: 1,
+    borderRightColor: "#D1D5DB",
+    fontSize: 10,
+    textAlign: "center",
+  },
+  tableCellDescription: {
+    flex: 2,
+    padding: 8,
+    borderRightWidth: 1,
+    borderRightColor: "#D1D5DB",
+    fontSize: 10,
+    textAlign: "center",
+  },
+  rightContent: {
+    flex: 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  borderLeft: {
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "#D1D5DB",
+    borderStyle: "solid",
+  },
+  borderRightOnly: {
+    borderRightWidth: 1,
+    borderRightColor: "#D1D5DB",
+    borderStyle: "solid",
+  },
+  tableCellNumeric: {
+    textAlign: "center",
+  },
+  leftEmptySpace: {
+    flex: 5,
+  },
+  lastTableCell: {
+    padding: 8,
+    fontSize: 12,
+    textAlign: "center",
+  },
+  headerRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#D1D5DB",
+  },
+  dataRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#D1D5DB",
+  },
+  summaryRow: {
+    backgroundColor: "#F3F4F6",
+    borderTopWidth: 2,
+    borderTopColor: "#D1D5DB",
+  },
+  summaryCell: {
+    fontWeight: "bold",
+    padding: 8,
+  },
+  summaryCellValue: {
+    textAlign: "center",
+    padding: 8,
+  },
+
+  invoiceAmountInWords: {
+    marginTop: 16,
+    fontSize: 10,
+    fontWeight: "bold",
+
+    textAlign: "right",
+
+    fontFamily: "Poppins",
+
+    color: "#2d3748",
+  },
+
+  invoiceBankDetailsTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+
+    marginBottom: 4,
+    textAlign: "left",
+
+    fontFamily: "Poppins",
+
+    color: "#2d3748",
+  },
+  invoiceBankDetailsText: {
+    fontSize: 10, // Adjust font size for address details
+    textAlign: "left", // Align text to the left
+    lineHeight: 1.4,
+  },
+  invoiceDeclaration: {
+    marginTop: 6,
+    fontSize: 10, // Adjust font size for address details
+    textAlign: "left", // Align text to the left
+    lineHeight: 1.4,
+  },
+  invoiceSignature: {
+    marginTop: 32,
+    textAlign: "right",
+    fontSize: 12,
+    color: "#4a5568",
+  },
+  pageNumber: {
+    position: "absolute",
+    fontSize: 12,
+    bottom: 30,
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    color: "grey",
+  },
+});
+
+const InvoicePDF = ({ data, invoiceList }) => {
+  // Convert the date string to a Date object
+  const invoiceDate = new Date(data.date);
+  const {
+    data: invoicesResponse,
+    error,
+    isLoading,
+    refetch,
+  } = useGetAllInvoicesQuery();
+  const invoiceList = invoicesResponse?.data?.invoices || [];
+  console.log("invoiceList", invoiceList);
+  // Format the date to a more readable format
+  const formattedDate = invoiceDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
-
-  const [createInvoice, { isLoading: isCreating }] = useCreateInvoiceMutation();
-  const [avatar, setAvatar] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
-  const [invoiceData, setInvoiceData] = useState({
-    /* initial state */
-  });
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const [parent, child] = name.split(".");
-
-    if (child) {
-      setFormData((prevData) => ({
-        ...prevData,
-        [parent]: {
-          ...prevData[parent],
-          [child]: value,
-        },
-      }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleItemChange = (index, e) => {
-    const { name, value } = e.target;
-    const itemKey = name.split(".")[2];
-
-    setFormData((prevData) => {
-      const newItems = [...prevData.items];
-      newItems[index][itemKey] = value;
-      return { ...prevData, items: newItems };
-    });
-  };
-
-  const addItem = () => {
-    setFormData((prevData) => ({
-      ...prevData,
-      items: [
-        ...prevData.items,
-        {
-          SerialNumber: "",
-          description: "",
-          hsnCode: "",
-          unit: "",
-          price: "",
-          qty: "",
-        },
-      ],
-    }));
-  };
-
-  const deleteItem = (index) => {
-    setFormData((prevData) => {
-      const newItems = prevData.items.filter((_, i) => i !== index);
-      return { ...prevData, items: newItems };
-    });
-  };
-
-  const handleImageChange = (e) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setAvatarPreview(reader.result);
-        setAvatar(e.target.files[0]);
-      }
-    };
-    reader.readAsDataURL(e.target.files[0]);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formDataToSend = new FormData();
-    formDataToSend.append("companyName", formData.companyName);
-    formDataToSend.append("image", avatar);
-    formDataToSend.append("imagePosition", formData.imagePosition);
-    formDataToSend.append("taxRate", formData.taxRate);
-    formDataToSend.append("declaration", formData.declaration);
-    formDataToSend.append("managingDirector", formData.managingDirector);
-    formDataToSend.append("signature", formData.signature);
-    formDataToSend.append("taxInvoice", formData.taxInvoice);
-    formDataToSend.append("panNo", formData.panNo);
-    formDataToSend.append("gstNo", formData.gstNo);
-    formDataToSend.append("invoiceNo", formData.invoiceNo);
-    formDataToSend.append("date", formData.date);
-
-    Object.entries(formData.billedTo).forEach(([key, value]) => {
-      formDataToSend.append(`billedTo[${key}]`, value);
-    });
-    Object.entries(formData.shippedTo).forEach(([key, value]) => {
-      formDataToSend.append(`shippedTo[${key}]`, value);
-    });
-    Object.entries(formData.companyAddress).forEach(([key, value]) => {
-      formDataToSend.append(`companyAddress[${key}]`, value);
-    });
-    Object.entries(formData.bankDetails).forEach(([key, value]) => {
-      formDataToSend.append(`bankDetails[${key}]`, value);
-    });
-
-    formData.items.forEach((item, index) => {
-      Object.entries(item).forEach(([key, value]) => {
-        formDataToSend.append(`items[${index}][${key}]`, value);
-      });
-    });
-
-    try {
-      await createInvoice(formDataToSend).unwrap();
-      onInvoiceCreated(); // Notify parent to refresh the list
-      console.log("Invoice created successfully");
-    } catch (err) {
-      console.error("Failed to create invoice:", err);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (e.shiftKey) {
-        focusPreviousField(e);
-      } else {
-        focusNextField(e);
-      }
-    }
-  };
-
-  const focusNextField = (e) => {
-    const inputs = Array.from(document.querySelectorAll("input, select"));
-    const currentIndex = inputs.indexOf(e.target);
-    const nextIndex = (currentIndex + 1) % inputs.length;
-    inputs[nextIndex].focus();
-  };
-
-  const focusPreviousField = (e) => {
-    const inputs = Array.from(document.querySelectorAll("input, select"));
-    const currentIndex = inputs.indexOf(e.target);
-    const prevIndex = (currentIndex - 1 + inputs.length) % inputs.length;
-    inputs[prevIndex].focus();
-  };
+  const subtotal = data.items.reduce(
+    (acc, item) => acc + Number(item.price) * item.qty,
+    0
+  );
+  const cgst = subtotal * 0.09;
+  const sgst = subtotal * 0.09;
+  const total = subtotal + cgst + sgst;
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <h2 className="text-xl font-semibold mb-4">Invoice Form</h2>
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Invoice Header */}
+        <View style={styles.bodyWrapper}>
+          <View style={styles.invoiceHeader}>
+            <View>
+              <Text style={styles.invoiceTitle}>{data.companyName}</Text>
+              <View style={styles.invoiceCompanyDetails}>
+                {data.companyAddress && (
+                  <>
+                    <Text style={styles.invoiceCompanyDetailsText}>
+                      {data.companyAddress.line1}
+                    </Text>
+                    <Text style={styles.invoiceCompanyDetailsText}>
+                      {data.companyAddress.line2}
+                    </Text>
+                    <Text style={styles.invoiceCompanyDetailsText}>
+                      {data.companyAddress.line3}
+                    </Text>
+                    <Text style={styles.invoiceCompanyDetailsText}>
+                      {data.companyAddress.line4}
+                    </Text>
+                    <Text style={styles.invoiceCompanyDetailsText}>
+                      {data.companyAddress.line5}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+            <Image src={data.image} style={styles.invoiceLogo} />
+          </View>
 
-        {/* Company Name */}
-        <div className="mb-4">
-          <input
-            type="text"
-            name="companyName"
-            placeholder="Company Name"
-            value={formData.companyName}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-        </div>
+          <Text style={styles.invoiceTaxTitle}>Tax Invoice</Text>
+          <View style={styles.invoiceDetails}>
+            <View>
+              <Text style={styles.invoiceDetailsText}>
+                PAN NO: {data.panNo}
+              </Text>
+              <Text style={styles.invoiceDetailsText}>
+                GST NO: {data.gstNo}
+              </Text>
+            </View>
+            <View>
+              <Text style={styles.invoiceDetailsText}>
+                INVOICE NO: {data.invoiceNo}
+              </Text>
+              <Text style={styles.invoiceDetailsText}>
+                DATE: {formattedDate}
+              </Text>
+            </View>
+          </View>
 
-        {/* Image Upload */}
-        <div className="mb-4">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="custom-file-input"
-            id="customFile"
-            name="avatar"
-          />
-          <label
-            htmlFor="customFile"
-            className="block w-full p-2 border border-gray-300 rounded cursor-pointer"
-          >
-            {formData.image ? "Avatar Added" : "Choose Avatar"}
-          </label>
-          {avatarPreview && (
-            <img
-              src={avatarPreview}
-              alt="Avatar Preview"
-              className="mt-2 w-32 h-32 object-cover"
-            />
-          )}
-        </div>
-        {/* Company Address */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Company Address:</legend>
-          {["line1", "line2", "line3", "line4", "line5"].map((field) => (
-            <input
-              key={field}
-              type="text"
-              name={`companyAddress.${field}`}
-              placeholder={field.replace(/^\w/, (c) => c.toUpperCase())}
-              value={formData.companyAddress[field]}
-              onChange={handleChange}
-              onKeyDown={handleKeyPress}
-              className="block w-full p-2 border border-gray-300 rounded mb-2"
-            />
-          ))}
-        </fieldset>
+          {/* Billed and Shipped To Addresses */}
+          <View style={styles.invoiceAddresses}>
+            <View style={styles.invoiceAddressesFlex}>
+              <View>
+                <Text style={styles.invoiceAddressTitle}>Billed To:</Text>
+                {data.billedTo && (
+                  <>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.billedTo.line1}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.billedTo.line2}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.billedTo.line3}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.billedTo.line4}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.billedTo.line5}
+                    </Text>
+                  </>
+                )}
+              </View>
+              <View>
+                <Text style={styles.invoiceAddressTitle}>Shipped To:</Text>
+                {data.shippedTo && (
+                  <>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.shippedTo.line1}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.shippedTo.line2}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.shippedTo.line3}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.shippedTo.line4}
+                    </Text>
+                    <Text style={styles.invoiceDetailsText}>
+                      {data.shippedTo.line5}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+          </View>
 
-        {/* Other Details */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Other Details:</legend>
-          <input
-            type="text"
-            name="taxInvoice"
-            placeholder="Tax Invoice"
-            value={formData.taxInvoice}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <input
-            type="text"
-            name="invoiceNo"
-            placeholder="Invoice No"
-            value={formData.invoiceNo}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <input
-            type="text"
-            name="panNo"
-            placeholder="Pan No"
-            value={formData.panNo}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <input
-            type="text"
-            name="gstNo"
-            placeholder="GST No"
-            value={formData.gstNo}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-        </fieldset>
+          {/* Invoice Items */}
+          <View style={styles.tableContainer}>
+            {/* Header Row */}
+            <View style={[styles.tableRow, styles.headerRow]}>
+              <Text style={styles.tableCellHeader}>Sl No.</Text>
+              <Text style={styles.tableCellDescriptionHeader}>
+                Item of description
+              </Text>
+              <Text style={styles.tableCellHeader}>HSN Code</Text>
+              <Text style={styles.tableCellHeader}>Unit</Text>
+              <Text style={styles.tableCellHeader}>Rate</Text>
+              <Text style={styles.tableCellHeader}>Amount</Text>
+            </View>
 
-        {/* Billed To Address */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Billed To:</legend>
-          {["line1", "line2", "line3", "line4", "line5"].map((field) => (
-            <input
-              key={field}
-              type="text"
-              name={`billedTo.${field}`}
-              placeholder={field.replace(/^\w/, (c) => c.toUpperCase())}
-              value={formData.billedTo[field]}
-              onChange={handleChange}
-              onKeyDown={handleKeyPress}
-              className="block w-full p-2 border border-gray-300 rounded mb-2"
-            />
-          ))}
-        </fieldset>
+            {/* Data Rows */}
+            {data.items.map((item, index) => (
+              <View style={[styles.tableRow, styles.dataRow]} key={index}>
+                <Text style={styles.tableCell}>{index + 1}</Text>
+                <Text style={styles.tableCellDescription}>
+                  {item.description}
+                </Text>
+                <Text style={styles.tableCell}>{item.hsnCode}</Text>
+                <Text style={[styles.tableCell, styles.tableCellNumeric]}>
+                  {item.unit}
+                </Text>
+                <Text style={[styles.tableCell, styles.tableCellNumeric]}>
+                  {item.price}
+                </Text>
+                <Text style={[styles.tableCell, styles.tableCellNumeric]}>
+                  {item.qty * item.price}
+                </Text>
+              </View>
+            ))}
 
-        {/* Shipped To Address */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Shipped To:</legend>
-          {["line1", "line2", "line3", "line4", "line5"].map((field) => (
-            <input
-              key={field}
-              type="text"
-              name={`shippedTo.${field}`}
-              placeholder={field.replace(/^\w/, (c) => c.toUpperCase())}
-              value={formData.shippedTo[field]}
-              onChange={handleChange}
-              onKeyDown={handleKeyPress}
-              className="block w-full p-2 border border-gray-300 rounded mb-2"
-            />
-          ))}
-        </fieldset>
+            {/* Subtotal Row */}
+            <View style={[styles.tableRow, styles.summaryRow]}>
+              <View style={styles.leftEmptySpace} />
+              <View style={[styles.rightContent, styles.borderRightOnly]}>
+                <Text style={[styles.tableCell, styles.summaryCell]}>
+                  Subtotal
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    styles.tableCellNumeric,
+                    styles.summaryCellValue,
+                  ]}
+                >
+                  {subtotal}
+                </Text>
+              </View>
+            </View>
 
-        {/* Items */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Items:</legend>
-          {formData.items.map((item, index) => (
-            <div key={index} className="border p-4 rounded mb-2">
-              {Object.keys(item).map((field) => (
-                <input
-                  key={field}
-                  type="text"
-                  name={`items.${index}.${field}`}
-                  placeholder={field.replace(/^\w/, (c) => c.toUpperCase())}
-                  value={item[field]}
-                  onChange={(e) => handleItemChange(index, e)}
-                  onKeyDown={handleKeyPress}
-                  className="block w-full p-2 border border-gray-300 rounded mb-2"
-                />
-              ))}
-              <button
-                type="button"
-                onClick={() => deleteItem(index)}
-                className="bg-red-500 text-white p-2 rounded"
-              >
-                Delete Item
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addItem}
-            className="bg-blue-500 text-white p-2 rounded"
-          >
-            Add Item
-          </button>
-        </fieldset>
+            {/* CGST Row */}
+            <View style={[styles.tableRow, styles.summaryRow]}>
+              <View style={styles.leftEmptySpace} />
+              <View style={[styles.rightContent, styles.borderRightOnly]}>
+                <Text style={[styles.tableCell, styles.summaryCell]}>
+                  CGST (9%)
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    styles.tableCellNumeric,
+                    styles.summaryCellValue,
+                  ]}
+                >
+                  {cgst}
+                </Text>
+              </View>
+            </View>
 
-        {/* Declaration */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Declaration:</legend>
-          <input
-            type="text"
-            name="declaration"
-            placeholder="Declaration"
-            value={formData.declaration}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <input
-            type="text"
-            name="managingDirector"
-            placeholder="Managing Director"
-            value={formData.managingDirector}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <input
-            type="text"
-            name="signature"
-            placeholder="Signature"
-            value={formData.signature}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-        </fieldset>
+            {/* SGST Row */}
+            <View style={[styles.tableRow, styles.summaryRow]}>
+              <View style={styles.leftEmptySpace} />
+              <View style={[styles.rightContent, styles.borderRightOnly]}>
+                <Text style={[styles.tableCell, styles.summaryCell]}>
+                  SGST (9%)
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    styles.tableCellNumeric,
+                    styles.summaryCellValue,
+                  ]}
+                >
+                  {sgst}
+                </Text>
+              </View>
+            </View>
 
-        {/* Tax Rate */}
-        <div className="mb-4">
-          <input
-            type="text"
-            name="taxRate"
-            placeholder="Tax Rate"
-            value={formData.taxRate}
-            onChange={handleChange}
-            onKeyDown={handleKeyPress}
-            className="block w-full p-2 border border-gray-300 rounded mb-2"
-          />
-        </div>
+            {/* Total Row */}
+            <View style={[styles.tableRow, styles.summaryRow]}>
+              <View style={styles.leftEmptySpace} />
+              <View style={[styles.rightContent, styles.borderRightOnly]}>
+                <Text style={[styles.tableCell, styles.summaryCell]}>
+                  Total
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    styles.tableCellNumeric,
+                    styles.summaryCellValue,
+                  ]}
+                >
+                  {total}
+                </Text>
+              </View>
+            </View>
+          </View>
 
-        {/* Bank Details */}
-        <fieldset className="border p-4 rounded-lg">
-          <legend className="text-lg font-semibold">Bank Details:</legend>
-          {["name", "accountNumber", "ifsc", "branch"].map((field) => (
-            <input
-              key={field}
-              type="text"
-              name={`bankDetails.${field}`}
-              placeholder={field.replace(/^\w/, (c) => c.toUpperCase())}
-              value={formData.bankDetails[field]}
-              onChange={handleChange}
-              onKeyDown={handleKeyPress}
-              className="block w-full p-2 border border-gray-300 rounded mb-2"
-            />
-          ))}
-        </fieldset>
+          {/* Amount in Words */}
+          <Text style={styles.invoiceAmountInWords}>
+            Amount in Words: {convertNumberToWords(total)} Only
+          </Text>
 
-        <button
-          type="submit"
-          className="bg-green-500 text-white p-2 rounded"
-          disabled={isCreating}
-        >
-          {isCreating ? "Creating..." : "Create Invoice"}
-        </button>
-      </form>
-    </div>
+          {/* Bank Details */}
+          <View style={styles.invoiceBankDetails}>
+            <Text style={styles.invoiceBankDetailsTitle}>Bank Details:</Text>
+            <Text style={styles.invoiceBankDetailsText}>
+              Account Name: {data.bankDetails.name}
+            </Text>
+            <Text style={styles.invoiceBankDetailsText}>
+              Account Number: {data.bankDetails.accountNumber}
+            </Text>
+            <Text style={styles.invoiceBankDetailsText}>
+              Bank Name: {data.bankDetails.branch}
+            </Text>
+            <Text style={styles.invoiceBankDetailsText}>
+              IFSC Code: {data.bankDetails.ifsc}
+            </Text>
+          </View>
+
+          {/* Declaration */}
+          <Text style={styles.invoiceDeclaration}>{data.declaration}</Text>
+
+          {/* Signature*/}
+          <Text style={styles.invoiceSignature}>
+            For {data.managingDirector}
+            {data.signature}
+          </Text>
+        </View>
+
+        {/* Page Number */}
+        <Text
+          style={styles.pageNumber}
+          render={({ pageNumber, totalPages }) =>
+            `Page ${pageNumber} of ${totalPages}`
+          }
+        />
+      </Page>
+    </Document>
   );
 };
 
-export default InvoiceForm;
+export default InvoicePDF;

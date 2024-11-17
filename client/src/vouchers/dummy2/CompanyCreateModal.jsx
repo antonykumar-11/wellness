@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function CreateCompany({ closeModal, onCompanyCreate, isLoading }) {
+function CreateCompanyModal({ closeModal, onCompanyCreate, isLoading }) {
   console.log("closeModal", closeModal);
   console.log("onCompanyCreate", onCompanyCreate);
   console.log("isLoading", isLoading);
@@ -146,14 +146,13 @@ function CreateCompany({ closeModal, onCompanyCreate, isLoading }) {
       className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-40"
       onClick={handleOverlayClick}
     >
-      <div className="bg-gray-200 dark:bg-gray-800 rounded-lg shadow-md p-6 overflow-y-auto  max-h-full">
+      <div className="bg-gray-200 dark:bg-gray-800 border dark:border-white rounded-lg lg:-mr-40 shadow-md p-6 overflow-y-auto  max-h-full">
         <button onClick={closeModal}></button>
-        <h1 className="text-2xl font-bold mb-6">Create Company</h1>
         <form
           onSubmit={handleSubmit}
           className="space-y-6 rounded-lg p-6 shadow-md transition-all duration-300 ease-in-out bg-gray-200 dark:bg-gray-800"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Field for Company Name */}
             <div className="mb-4">
               <label
@@ -829,4 +828,4 @@ function CreateCompany({ closeModal, onCompanyCreate, isLoading }) {
   );
 }
 
-export default CreateCompany;
+export default CreateCompanyModal;

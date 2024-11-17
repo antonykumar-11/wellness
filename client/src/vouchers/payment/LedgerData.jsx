@@ -21,6 +21,7 @@ export const groups = [
   "Loans (Liability)",
   "Sales Return",
   "Stock-in-Hand",
+  "Indirect Purchase Return",
 ];
 
 // export const groupTypes = {
@@ -63,6 +64,7 @@ export const groupTypes = {
   "Bank Accounts": { type: "Assets", nature: "Debit" },
   "Sales Return": { type: "Income", nature: "Debit" },
   "Purchase Return": { type: "Expenses", nature: "Credit" },
+  "Indirect Purchase Return": { type: "Expenses", nature: "Credit" },
   "Duties & Taxes": { type: "Liabilities", nature: "Credit" },
   Provisions: { type: "Liabilities", nature: "Credit" },
   "Loans & Advances (Asset)": { type: "Assets", nature: "Debit" },

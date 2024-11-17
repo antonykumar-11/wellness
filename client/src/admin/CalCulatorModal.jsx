@@ -47,7 +47,7 @@ const CalculatorModal = ({ isOpen, onClose }) => {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-5 rounded-lg shadow-lg w-80">
             <h2 className="text-xl mb-4 text-center">Calculator</h2>
             <div className="bg-gray-200 p-4 text-right text-2xl mb-4 h-16 overflow-hidden rounded flex items-center justify-between">

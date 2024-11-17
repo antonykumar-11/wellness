@@ -5,12 +5,13 @@ export const userApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
     prepareHeaders: (headers, { getState }) => {
-      const token =
-        getState().auth?.user?.token || localStorage.getItem("token");
-      console.log("Resolved token:", token); // Debugging
+      const state = getState();
+      const token = state.auth?.user?.token || localStorage.getItem("token"); // Check both sources
+      console.log("token", token);
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
+
       return headers;
     },
   }),
@@ -55,11 +56,12 @@ export const userApi = createApi({
     }),
     deleteUser: builder.mutation({
       query: (id) => ({
-        url: `user/users/${id}`,
+        url: `auth/delete/${id}`, // Ensure this matches your actual backend route
         method: "DELETE",
       }),
       invalidatesTags: (result, error, id) => [{ type: "User", id }],
     }),
+
     // New login endpoint
     login: builder.mutation({
       query: (credentials) => ({
@@ -77,7 +79,7 @@ export const userApi = createApi({
     // New register endpoint
     register: builder.mutation({
       query: (userData) => ({
-        url: `auth/register`, // Make sure there are no extra spaces here
+        url: `auth/register`,
         method: "POST",
         body: userData,
       }),
