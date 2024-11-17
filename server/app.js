@@ -10,14 +10,23 @@ const connectDatabase = require("./config/database");
 dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 // CORS options
+const allowedOrigins = [
+  "https://wellness-rouge.vercel.app",
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+];
+
 const corsOptions = {
-  origin: [
-    "https://wellness-rouge.vercel.app", // frontend URL
-    "http://localhost:5173", // local frontend
-    process.env.FRONTEND_URL, // production frontend URL
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
+  allowedHeaders: ["Authorization", "Content-Type"],
 };
 // Create an instance of express
 const app = express();

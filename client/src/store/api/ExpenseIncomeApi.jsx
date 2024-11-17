@@ -2,7 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const expenseIncomeApiSlice = createApi({
   reducerPath: "expenseIncomeApiSlice",
-  baseQuery: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Correct usage of fetchBaseQuery
+  }),
   endpoints: (builder) => ({
     getIncome: builder.query({
       query: () => "expenseincomes",

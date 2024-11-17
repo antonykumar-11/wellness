@@ -2,7 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const invoiceApi = createApi({
   reducerPath: "invoiceApi",
-  baseQuery: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Correct usage of fetchBaseQuery
+  }),
   tagTypes: ["Invoice"],
   endpoints: (builder) => ({
     getAllInvoices: builder.query({

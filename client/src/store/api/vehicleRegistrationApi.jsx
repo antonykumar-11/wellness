@@ -3,7 +3,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Define the base API service
 export const vehicleRegistrationApi = createApi({
   reducerPath: "vehicleRegistrationApi",
-  baseQuery: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`,
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${import.meta.env.VITE_BACKEND_URL}/api/v1/`, // Correct usage of fetchBaseQuery
+  }),
   endpoints: (builder) => ({
     // Fetch all vehicle registrations
     getAllVehicleRegistrations: builder.query({
