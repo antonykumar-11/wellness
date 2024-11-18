@@ -154,6 +154,7 @@ import PayMasterViewEdit from "./AllLedgerViewAdnEdit/PayMasterViewEdit";
 import VehicleRentEdit from "./Staffmanagement/VehicleRentEdit";
 import useTheme from "./context/Theme";
 import IndirectDreditNote from "./CreditNotee/IndirectDreditNote";
+import Kumar from "./kumar.";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { themeMode } = useTheme();
@@ -176,7 +177,8 @@ function App() {
           <SalaryProvider>
             <AuthProvider>
               <Routes>
-                <Route path="/" element={<Loader />} />
+                {/* <Route path="/" element={<Loader />} /> */}
+                <Route path="/" element={<Kumar />} />
                 <Route path="/login" element={<Login />} />
 
                 <Route path="/register" element={<Register />} />
