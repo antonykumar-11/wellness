@@ -47,6 +47,15 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Body parser middleware
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  console.log(`${req.method} request to ${req.url}`);
+  next();
+});
+
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(500).json({ message: "Internal Server Error" });
+});
 
 // Routes
 const User = require("./routes/userRoutes");
