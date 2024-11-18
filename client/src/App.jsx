@@ -498,8 +498,11 @@ function App() {
                 >
                   <Route path="" element={<ItemsOutlet />}>
                     <Route index element={<ItemsHome />} />
-                    <Route path="invoice-preview" element={<ItemsMain />} />
-                    <Route path="invoice/edit/:id" element={<InvoiceEdit />} />
+                    <Route
+                      path="invoice-preview"
+                      element={<CustomerManagement />}
+                    />
+                    <Route path="invoice/edit/:id" element={<GetCustomer />} />
                     <Route
                       path="customerManagement"
                       element={<CustomerManagement />}
