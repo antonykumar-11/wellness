@@ -1,5 +1,5 @@
 import React from "react";
-import Banner from "./Homess/Banner";
+import Banner from "./Homes/Banner";
 import Contact from "./Homes/Contact";
 import Features from "./Homes/Features ";
 
