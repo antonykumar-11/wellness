@@ -8,6 +8,7 @@ import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import "slick-carousel/slick/slick.css";
+// kfhjkdf
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Provider store={store}>
