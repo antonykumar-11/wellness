@@ -9,12 +9,12 @@ const connectDatabase = require("./config/database");
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
-// CORS options
 const allowedOrigins = [
   "https://wellness-rouge.vercel.app", // Correct your frontend URL here
-  "http://localhost:5173",
-  process.env.FRONTEND_URL, // Ensure this is correctly set in the environment variables
+  "http://localhost:5173", // Development URL
+  process.env.FRONTEND_URL, // Backend uses .env URL for CORS check
 ];
+console.log("Frontend URL from .env:", process.env.FRONTEND_URL);
 
 const corsOptions = {
   origin: (origin, callback) => {
