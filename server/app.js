@@ -10,11 +10,10 @@ const connectDatabase = require("./config/database");
 dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 const allowedOrigins = [
-  "https://wellness-9.onrender.com/",
-  "https://wellness-eight.vercel.app", // Add your correct frontend URL
-  "https://wellness-rouge.vercel.app", // Keep other allowed origins
+  "https://wellness-eight.vercel.app",
+  "https://wellness-csxhciu9b-antonykumar-11s-projects.vercel.app",
   "http://localhost:5173", // For local development
-  process.env.FRONTEND_URL, // From environment variables
+  process.env.FRONTEND_URL, // Should resolve to https://wellness-9.onrender.com
 ];
 
 console.log("Frontend URL from .env:", process.env.FRONTEND_URL);
