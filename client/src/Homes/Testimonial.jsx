@@ -3,9 +3,9 @@ import Slider from "react-slick";
 import { RiStarFill } from "react-icons/ri";
 import { HiArrowRight, HiArrowLeft } from "react-icons/hi";
 import Title from "./Title";
-import testimonialOne from "../assets/images/dummy.png";
-import testimonialTwo from "../assets/images/dummy2.png";
-import quote from "../assets/images/testmonial/quote.png";
+import testimonialOne from "../assets/icons/sun.svg";
+import testimonialTwo from "../assets/icons/moon.svg";
+import quote from "../assets/images/sun.svg";
 
 function SampleNextArrow(props) {
   const { onClick } = props;
