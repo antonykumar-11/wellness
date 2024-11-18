@@ -1,6 +1,6 @@
 import React from "react";
 import { FaFacebookF, FaInstagram } from "react-icons/fa"; // Imported Instagram instead of Twitter and LinkedIn
-import contactImg from "../assets/images/contact/contactImg.png"; // Adjust path as needed
+import contactImg from "../assets/images/ajith.jpg"; // Adjust path as needed
 
 const ContactLeft = () => {
   // Handle phone call when "Book Now" button is clicked
