@@ -118,7 +118,9 @@ const GetCustomer = () => {
 
   // Filter customers based on search query
   const filteredCustomers = customers?.filter(
-    (customer) => customer.phone_number.includes(searchQuery) // Filter by phone number
+    (customer) =>
+      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || // Search by name
+      customer.phone_number.includes(searchQuery) // Search by phone number
   );
 
   return (
@@ -134,7 +136,7 @@ const GetCustomer = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)} // Update search query
-            placeholder="Search by phone number..."
+            placeholder="Search by name or phone number..."
             className="border border-gray-300 p-2 rounded-md w-full sm:w-1/3"
           />
         </div>
@@ -243,7 +245,6 @@ const GetCustomer = () => {
 
         <ToastContainer />
       </div>
-
       <div className="block sm:hidden container mx-auto p-4 sm:p-2 flex flex-col justify-center items-center">
         <h1 className="text-xl font-bold mb-4 text-center">
           Veda Wellness Customer
@@ -255,7 +256,7 @@ const GetCustomer = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)} // Update search query
-            placeholder="Search by phone number..."
+            placeholder="Search by name or phone number..."
             className="border border-gray-300 p-2 rounded-md w-full sm:w-1/3"
           />
         </div>
@@ -364,6 +365,7 @@ const GetCustomer = () => {
 
         <ToastContainer />
       </div>
+      ;
     </>
   );
 };
