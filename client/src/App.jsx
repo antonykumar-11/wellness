@@ -155,6 +155,8 @@ import VehicleRentEdit from "./Staffmanagement/VehicleRentEdit";
 import useTheme from "./context/Theme";
 import IndirectDreditNote from "./CreditNotee/IndirectDreditNote";
 import Kumar from "./Freindend/kumar.";
+import CustomerManagement from "./invoice/CustomerManagement";
+import GetCustomer from "./invoice/GetCustomer";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { themeMode } = useTheme();
@@ -498,6 +500,11 @@ function App() {
                     <Route index element={<ItemsHome />} />
                     <Route path="invoice-preview" element={<ItemsMain />} />
                     <Route path="invoice/edit/:id" element={<InvoiceEdit />} />
+                    <Route
+                      path="customerManagement"
+                      element={<CustomerManagement />}
+                    />
+                    <Route path="getCustomer" element={<GetCustomer />} />
                   </Route>
                 </Route>
                 <Route
