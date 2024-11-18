@@ -18,9 +18,11 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
+    console.log("Request Origin:", origin); // Debug origin
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
+      console.error("CORS Blocked for Origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -28,6 +30,7 @@ const corsOptions = {
   credentials: true,
   allowedHeaders: ["Authorization", "Content-Type"],
 };
+
 // Create an instance of express
 const app = express();
 
