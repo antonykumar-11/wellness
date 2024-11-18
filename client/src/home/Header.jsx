@@ -74,7 +74,13 @@ const Header = ({ toggleSidebar }) => {
           )}
         </button>
       </div>
-
+      {/* Home Redirect Button */}
+      <button
+        onClick={handleHomeClick}
+        className="bg-blue-500 text-white px-6 py-3 rounded ml-4"
+      >
+        Go Home
+      </button>
       {/* Sidebar toggle button for small screens */}
       <button
         className="md:hidden p-2"
@@ -82,14 +88,6 @@ const Header = ({ toggleSidebar }) => {
         aria-label="Toggle sidebar"
       >
         <MenuIcon size={24} />
-      </button>
-
-      {/* Home Redirect Button */}
-      <button
-        onClick={handleHomeClick}
-        className="bg-blue-500 text-white px-6 py-3 rounded ml-4"
-      >
-        Go Home
       </button>
     </header>
   );
