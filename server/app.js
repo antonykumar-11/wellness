@@ -11,9 +11,9 @@ dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 // CORS options
 const allowedOrigins = [
-  "https://wellness-rouge.vercel.app",
+  "https://wellness-rouge.vercel.app", // Correct your frontend URL here
   "http://localhost:5173",
-  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL, // Ensure this is correctly set in the environment variables
 ];
 
 const corsOptions = {
