@@ -492,6 +492,21 @@ function Sidebar({ isSidebarOpen }) {
                 Show Ledger
               </NavLink>
               <NavLink
+                to="/invoice/customerManagement"
+                className="block py-1 px-2 hover:bg-gray-200 rounded-md transition-all"
+                onClick={() => handleNavigation("/reports/incomemain")}
+              >
+                customerManagements
+              </NavLink>
+              <NavLink
+                to="/invoice/GetCustomer"
+                className="block py-1 px-2 hover:bg-gray-200 rounded-md transition-all"
+                onClick={() => handleNavigation("/reports/incomemain")}
+              >
+                GetCustomer
+              </NavLink>
+
+              <NavLink
                 to="/reports/purchasereport"
                 className="block py-1 px-2 hover:bg-gray-200 rounded-md transition-all"
                 onClick={() => handleNavigation("/reports/purchasereport")}
@@ -519,7 +534,6 @@ function Sidebar({ isSidebarOpen }) {
               >
                 Stock category List
               </NavLink>
-
               <NavLink
                 to="/stock/ledgerCreate"
                 className="block py-1 px-2 hover:bg-gray-200 rounded-md transition-all"

@@ -11,6 +11,7 @@ dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 const allowedOrigins = [
   "https://www.vedawellness.life", // Ensure this is correct
+  "http://localhost:8000",
   "https://wellness-eight.vercel.app",
   "https://wellness-csxhciu9b-antonykumar-11s-projects.vercel.app",
   "http://localhost:5173", // For local development
