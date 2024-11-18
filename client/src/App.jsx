@@ -154,7 +154,7 @@ import PayMasterViewEdit from "./AllLedgerViewAdnEdit/PayMasterViewEdit";
 import VehicleRentEdit from "./Staffmanagement/VehicleRentEdit";
 import useTheme from "./context/Theme";
 import IndirectDreditNote from "./CreditNotee/IndirectDreditNote";
-import Kumar from "./kumar.";
+import Kumar from "./Freindend/kumar.";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { themeMode } = useTheme();
