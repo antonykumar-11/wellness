@@ -17,7 +17,10 @@ const Features = () => {
       </div>
       {/* Left Side: Text Content */}
       <div className="lg:w-1/2 text-gray-800 text-lg leading-relaxed">
-        <p className="text-white">
+        <p
+          className="text-white"
+          style={{ fontFamily: "Noto Sans Malayalam, sans-serif" }}
+        >
           Veda Wellness ൽ, ഞങ്ങൾ വിശ്വസിക്കുന്നത് ശരിയായ ആരോഗ്യപരിപാലനം
           ശരീരത്തിലേക്കുമാത്രമല്ല, അത് മനസ്സിന്റെയും ആത്മാവിന്റെയും
           പോഷണത്തിലേക്കുള്ള ഒരു യാത്രയാണ്. ആരോഗ്യo ഒറ്റപ്പെട്ട ഒരു ആശയമല്ലെന്ന്

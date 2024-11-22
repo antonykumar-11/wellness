@@ -28,6 +28,12 @@ function InvoiceHeader() {
         >
           GetCustomer
         </NavLink>
+        <NavLink
+          to="/invoice/manikutty"
+          className="px-3 py-1 no-underline rounded hover:text-white hover:bg-black dark:hover:bg-gradient-to-r from-green-400 to-blue-500"
+        >
+          manikutty
+        </NavLink>
       </div>
     </div>
   );

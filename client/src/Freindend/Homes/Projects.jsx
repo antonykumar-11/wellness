@@ -12,11 +12,7 @@ const Projects = () => {
       className="w-full py-20 border-b-[1px] border-b-black"
     >
       <div className="flex justify-center items-center text-center">
-        <Title
-          className="text-2xl"
-          title="VISIT MY PORTFOLIO AND KEEP YOUR FEEDBACK"
-          des="ഞങ്ങളുടെ സേവനങ്ങൾ "
-        />
+        <Title className="text-2xl" des="ഞങ്ങളുടെ സേവനങ്ങൾ " />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 xl:gap-14">
         <ProjectsCard

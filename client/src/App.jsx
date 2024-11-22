@@ -157,6 +157,7 @@ import IndirectDreditNote from "./CreditNotee/IndirectDreditNote";
 import Kumar from "./Freindend/kumar.";
 import CustomerManagement from "./invoice/CustomerManagement";
 import GetCustomer from "./invoice/GetCustomer";
+import XGetCustomer from "./invoice/Xl";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { themeMode } = useTheme();
@@ -505,6 +506,7 @@ function App() {
                       element={<CustomerManagement />}
                     />
                     <Route path="getCustomer" element={<GetCustomer />} />
+                    <Route path="manikutty" element={<XGetCustomer />} />
                   </Route>
                 </Route>
                 <Route

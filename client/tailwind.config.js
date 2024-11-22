@@ -61,6 +61,7 @@ module.exports = {
         quickSand: ["Quicksand", "sans-serif"],
         bodyFont: ["Poppins", "sans-serif"],
         titleFont: ["Montserrat", "sans-serif"],
+        malayalam: ["Noto Sans Malayalam", "sans-serif"], // Added Malayalam font
       },
     },
     container: {
