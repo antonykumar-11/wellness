@@ -216,32 +216,45 @@ const createSales = async (req, res) => {
 
 module.exports = createSales;
 
-// Update a sale by ID
-// Update a sale by ID
 const updateSales = async (req, res) => {
+  console.log("Request Body:", req.body);
   const { id } = req.params;
+
+  // Ensure that purchasedTo and purchasedBy are ObjectIds (not null or empty)
+  if (
+    !mongoose.Types.ObjectId.isValid(req.body.purchasedTo) ||
+    !mongoose.Types.ObjectId.isValid(req.body.purchasedBy)
+  ) {
+    return res.status(400).json({
+      message: "Invalid ObjectId for purchasedTo or purchasedBy",
+    });
+  }
 
   try {
     const updatedSales = await Sales.findByIdAndUpdate(
       id,
       {
         $set: {
-          "authorizedBy.name": req.body.authorizedBy?.name,
-          "authorizedBy.designation": req.body.authorizedBy?.designation,
-          "authorizedBy.signature": req.body.authorizedBy?.signature,
-          debitLedgers: req.body.debitLedgers,
-          creditLedgers: req.body.creditLedgers,
-          items: req.body.items,
-          transactionDate: req.body.transactionDate,
-          voucherNumber: req.body.voucherNumber,
-          creditPeriod: req.body.creditPeriod,
-          creditDueDate: req.body.creditDueDate,
-          description: req.body.description,
-          thisPurchase: req.body.thisPurchase,
-          total: req.body.total,
-          taxAmount: req.body.taxAmount,
-          taxRate: req.body.taxRate,
-          status: req.body.status,
+          "authorizedBy.name": req.body.authorizedBy?.name || null,
+          "authorizedBy.designation":
+            req.body.authorizedBy?.designation || null,
+          "authorizedBy.signature": req.body.authorizedBy?.signature || null,
+          debitLedgers: req.body.debitLedgers || [],
+          creditLedgers: req.body.creditLedgers || [],
+          items: req.body.items || [],
+          transactionDate: req.body.transactionDate || null,
+          voucherNumber: req.body.voucherNumber || "",
+          creditPeriod: req.body.creditPeriod || null,
+          creditDueDate: req.body.creditDueDate || "",
+          description: req.body.description || "",
+          thisPurchase: req.body.thisPurchase || "",
+          total: req.body.total || 0,
+          taxAmount: req.body.taxAmount || 0,
+          taxRate: req.body.taxRate || 0,
+          status: req.body.status || "Unsettled",
+          // Ensure purchasedTo and purchasedBy are valid ObjectId values
+          purchasedTo: mongoose.Types.ObjectId(req.body.purchasedTo),
+          purchasedBy: mongoose.Types.ObjectId(req.body.purchasedBy),
         },
       },
       { new: true, runValidators: true }
@@ -257,6 +270,7 @@ const updateSales = async (req, res) => {
     res.status(500).json({ message: "Error updating sales voucher", error });
   }
 };
+
 // Get all sales for the logged-in user
 const getAllSales = async (req, res) => {
   try {

@@ -15,7 +15,11 @@ router.get(
   isAuthenticatedUser,
   journalVoucherController.getAllJournalVouchers
 );
-
+router.get(
+  "/check",
+  isAuthenticatedUser,
+  journalVoucherController.getAllJournalVoucher
+);
 // Get a single Journal Voucher by ID
 router.get(
   "/:id",

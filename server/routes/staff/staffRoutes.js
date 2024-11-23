@@ -27,7 +27,7 @@ router.post(
 );
 
 // Update an employee by ID with avatar
-router.patch(
+router.put(
   "/employees/:id",
   isAuthenticatedUser,
   upload.single("avatar"),

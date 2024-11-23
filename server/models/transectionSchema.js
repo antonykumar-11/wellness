@@ -33,7 +33,7 @@ const transectionTrackSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+transectionTrackSchema.index({ owner: 1 }, { unique: true });
 const transectionTrackModel = mongoose.model(
   "transectionsTrack",
   transectionTrackSchema

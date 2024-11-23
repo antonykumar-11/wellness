@@ -24,9 +24,7 @@ const itemSchema = new Schema({
   taxAmount: { type: Number, required: false },
   amount: { type: Number, required: false },
   stockName: { type: String, required: false },
-
   stockGroupName: { type: String, required: false },
-
   stockGroup: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "StockCategory",
@@ -47,7 +45,7 @@ const SaleServiceSchema = new Schema(
     transactionDate: { type: Date, required: false },
     description: { type: String, required: false },
     saleDate: { type: Date, required: false },
-    voucherNumber: { type: String, required: true, unique: true },
+    voucherNumber: { type: String, required: true }, // Unique per owner
     totalAmount: { type: Number, required: false },
     paymentTerms: { type: String, required: false },
     saleNumber: { type: String, required: false },
@@ -57,7 +55,6 @@ const SaleServiceSchema = new Schema(
     creditDueDate: { type: Date, required: false },
     purposeOfSale: { type: String, required: false },
     customerDetails: {
-      // Changed from supplierDetails to customerDetails
       name: { type: String, required: false },
       address: { type: String, required: false },
       gstin: { type: String, required: false },
@@ -69,20 +66,20 @@ const SaleServiceSchema = new Schema(
     },
     departmentCostCenter: { type: String, required: false },
     remarks: { type: String },
-    receivable: { type: Number }, // Changed from payable to receivable
-    received: { type: Number }, // Changed from paid to received
+    receivable: { type: Number },
+    received: { type: Number },
     purchasedTo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company", // Reference to the Company model
+      ref: "Company",
       required: true,
     },
     purchasedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company", // Reference to the Company model
+      ref: "Company",
       required: true,
     },
-    debitLedgers: { type: [LedgerEntrySchema], required: false }, // Array of debit ledger entries
-    creditLedgers: { type: [LedgerEntrySchema], required: false }, // Array of credit ledger entries
+    debitLedgers: { type: [LedgerEntrySchema], required: false },
+    creditLedgers: { type: [LedgerEntrySchema], required: false },
     balanceBillByBill: { type: Boolean, default: false },
     checkCreditDays: { type: Boolean, default: false },
     panItNo: { type: String },
@@ -118,6 +115,9 @@ const SaleServiceSchema = new Schema(
   }
 );
 
+// Compound unique index on voucherNumber and owner
+SaleServiceSchema.index({ voucherNumber: 1, owner: 1 }, { unique: true });
+
 // Pre-validation middleware to filter invalid ledger entries
 SaleServiceSchema.pre("validate", function (next) {
   this.debitLedgers = this.debitLedgers.filter(
@@ -129,14 +129,12 @@ SaleServiceSchema.pre("validate", function (next) {
   next();
 });
 
-// Middleware to set transactionDate based on soldBy.invoiceDate and generate voucherNumber
+// Middleware to set transactionDate and generate voucherNumber
 SaleServiceSchema.pre("save", async function (next) {
-  // Set transactionDate based on soldBy.invoiceDate if available
   if (this.soldBy && this.soldBy.invoiceDate) {
     this.transactionDate = this.soldBy.invoiceDate;
   }
 
-  // Automatically generate voucherNumber if not present
   if (!this.voucherNumber) {
     const lastSale = await this.constructor
       .findOne()
@@ -146,16 +144,12 @@ SaleServiceSchema.pre("save", async function (next) {
     this.voucherNumber = (lastVoucherNumber + 1).toString().padStart(6, "0");
   }
 
-  // Calculate creditDueDate based on transactionDate and creditPeriod
   if (this.transactionDate && this.creditPeriod) {
     const transactionDate = new Date(this.transactionDate);
-    const creditPeriod = parseInt(this.creditPeriod, 10); // Convert creditPeriod to an integer
-
-    // Add the creditPeriod (in days) to the transactionDate
+    const creditPeriod = parseInt(this.creditPeriod, 10);
     const creditDueDate = new Date(
       transactionDate.setDate(transactionDate.getDate() + creditPeriod)
     );
-
     this.creditDueDate = creditDueDate;
   }
 

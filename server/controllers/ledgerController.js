@@ -66,20 +66,37 @@ exports.getAllLedgers = async (req, res) => {
 //     res.status(500).json({ message: err.message });
 //   }
 // };
-exports.getAllLedgersPay = async (req, res) => {
-  const group = "Cash-in-Hand"; // Fixed group value
-  const voucher1 = ["PayMaster", "otherType"]; // Array of voucher types to filter by
-  const payHeadType = ["Staff", "otherType"]; // Array of pay head types to filter by
+// exports.getAllLedgersPay = async (req, res) => {
+//   const group = "Cash-in-Hand"; // Fixed group value
+//   const voucher1 = ["PayMaster", "otherType"]; // Array of voucher types to filter by
+//   const payHeadType = ["Staff", "otherType"]; // Array of pay head types to filter by
 
+//   try {
+//     const ledgers = await Ledger.find({
+//       owner: req.user.id,
+//       $or: [
+//         { group: group },
+//         { voucher1: { $in: voucher1 } },
+//         { payHeadType: { $in: payHeadType } }, // Combine the conditions correctly
+//       ],
+//     });
+
+//     // If no ledgers found, return a 404
+//     if (ledgers.length === 0) {
+//       return res.status(404).json({ message: "No ledgers found." });
+//     }
+
+//     // Return the found ledgers
+//     res.status(200).json(ledgers);
+//   } catch (err) {
+//     console.error("Error fetching ledgers:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+exports.getAllLedgersPay = async (req, res) => {
   try {
-    const ledgers = await Ledger.find({
-      owner: req.user.id,
-      $or: [
-        { group: group },
-        { voucher1: { $in: voucher1 } },
-        { payHeadType: { $in: payHeadType } }, // Combine the conditions correctly
-      ],
-    });
+    // Fetch all ledgers for the user
+    const ledgers = await Ledger.find({ owner: req.user.id });
 
     // If no ledgers found, return a 404
     if (ledgers.length === 0) {
@@ -165,6 +182,8 @@ exports.getAllLedgersallPurchase = async (req, res) => {
 
 // Get a single ledger by ID
 exports.getLedgerById = async (req, res) => {
+  console.log(" _id: req.params.id,", req.params.id);
+  console.log(" _id: req.params.id,", req.user.id);
   try {
     const ledger = await Ledger.findOne({
       _id: req.params.id,
@@ -183,7 +202,7 @@ exports.getLedgerById = async (req, res) => {
 exports.updateLedger = async (req, res) => {
   try {
     const updatedLedger = await Ledger.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user.id }, // Filter by owner
+      { _id: req.params.id }, // Filter by owner
       req.body,
       { new: true }
     );

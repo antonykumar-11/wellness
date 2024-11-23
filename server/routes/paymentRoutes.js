@@ -1,28 +1,27 @@
 const express = require("express");
-const {
-  getPayments,
-  getPaymentById,
-  createPayment,
-  updatePayment,
-  deletePayment,
-  getAllVoucherNumbers,
-} = require("../controllers/paymentControllers");
-const { isAuthenticatedUser } = require("../middlewares/authenticate");
 const router = express.Router();
-router.get("/check", isAuthenticatedUser, getAllVoucherNumbers);
-// Get all payments
-router.get("/", isAuthenticatedUser, getPayments);
+const paymentController = require("../controllers/paymentControllers"); // Adjust to your Payment controller path
+const { isAuthenticatedUser } = require("../middlewares/authenticate");
 
-// Get a single payment by ID
-router.get("/:id", isAuthenticatedUser, getPaymentById);
+// Create a new Payment
+router.post("/", isAuthenticatedUser, paymentController.createPayment);
 
-// Create a new payment
-router.post("/", isAuthenticatedUser, createPayment);
+// Get all Payments
+router.get("/", isAuthenticatedUser, paymentController.getAllPayments);
+// Get all Payments
+router.get(
+  "/check",
+  isAuthenticatedUser,
+  paymentController.getAllVoucherNumbers
+);
+// Get a single Payment by ID
+router.get("/:id", isAuthenticatedUser, paymentController.getPaymentById);
 
-// Update a payment by ID
-router.put("/:id", isAuthenticatedUser, updatePayment);
+// Update a Payment by ID
+router.put("/:id", isAuthenticatedUser, paymentController.updatePayment);
 
-// Delete a payment by ID
-router.delete("/:id", isAuthenticatedUser, deletePayment);
+// Delete a Payment by ID
+router.delete("/:id", isAuthenticatedUser, paymentController.deletePayment);
 
 module.exports = router;
+// Get all voucher numbers from purchases

@@ -35,7 +35,8 @@ const vehicleRegistrationSchema = new mongoose.Schema({
     required: true,
   },
 });
-
+// Create a unique index on the owner field only
+vehicleRegistrationSchema.index({ owner: 1 }, { unique: true });
 const VehicleRegistration = mongoose.model(
   "VehicleRegistration",
   vehicleRegistrationSchema

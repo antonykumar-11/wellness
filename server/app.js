@@ -5,28 +5,19 @@ const path = require("path");
 const dotenv = require("dotenv");
 const errorMiddleware = require("./middlewares/error");
 const connectDatabase = require("./config/database");
-
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
-const allowedOrigins =
-  process.env.NODE_ENV === "production"
-    ? ["https://vedawellness.life", "https://wellness-9.onrender.com"]
-    : ["http://localhost:8000", "http://localhost:5173"];
-
 const corsOptions = {
-  origin: (origin, callback) => {
-    console.log("Request Origin:", origin); // Debug origin
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      console.error("CORS Blocked for Origin:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  origin: [
+    "https://johnson-dc80.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://www.alphacranesalpha.in",
+    process.env.FRONTEND_URL,
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
-  allowedHeaders: ["Authorization", "Content-Type"],
 };
 
 // Create an instance of express
@@ -34,26 +25,19 @@ const app = express();
 
 // Connect to database
 connectDatabase();
-
+// Apply CORS with options
+app.use(cors(corsOptions));
+// Handle preflight requests
+app.options("*", cors(corsOptions));
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
+
 // Handle preflight requests
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Body parser middleware
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  console.log(`${req.method} request to ${req.url}`);
-  next();
-});
-
-app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
-  res.status(500).json({ message: "Internal Server Error" });
-});
 
 // Routes
 const User = require("./routes/userRoutes");
@@ -94,8 +78,6 @@ const transactionRoutes = require("./routes/antony");
 const purchaseVoucherRoute = require("./routes/servicePurchaseRoutes");
 const salesVoucher = require("./routes/salesService");
 const assets = require("./routes/antony3");
-const customerRoutes = require("./routes/Customer");
-
 // Registering routes
 app.use("/api/v1/auth", User);
 app.use("/api/v1/payments", paymentRoutes);
@@ -138,13 +120,12 @@ app.use("/api/v1/transections", require("./routes/transactionRoutes"));
 app.use("/api/v1/transection", require("./routes/transectionRoute")); // personal app
 app.use("/api/v1/vehicle-rent", require("./routes/vehicleRent")); // personal app
 app.use("/api/v1/profits", require("./routes/monthProfit")); // personal app
-app.use("/api/v1/customers", customerRoutes); // personal app
 
 // Serve static files in production
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "../frontend/build/index.html"));
+    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
   });
 }
 

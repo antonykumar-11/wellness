@@ -12,6 +12,11 @@ router.post(
   isAuthenticatedUser,
   purchaseVoucherController.getAllVoucherNumber
 );
+router.get(
+  "/some",
+  isAuthenticatedUser,
+  purchaseVoucherController.getAllPurchaseReturn
+);
 // Create a new Purchase Voucher
 router.post("/", isAuthenticatedUser, purchaseVoucherController.createPurchase);
 

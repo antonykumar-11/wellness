@@ -6,7 +6,6 @@ const sendToken = require("../utils/jwt");
 const crypto = require("crypto");
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
-  console.log("req.body", req.body);
   const { name, email, password } = req.body;
 
   // Check if the user already exists
@@ -16,8 +15,10 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   }
 
   let avatar;
-  const BASE_URL =
-    process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
+  let BASE_URL = process.env.BACKEND_URL;
+  if (process.env.NODE_ENV === "production") {
+    BASE_URL = `${req.protocol}://${req.get("host")}`;
+  }
 
   if (req.file) {
     avatar = `${BASE_URL}/uploads/user/${req.file.originalname}`;
@@ -172,6 +173,7 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
+//Update Profile - /api/v1/update
 // Update Profile - /api/v1/update
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   let newUserData = {
@@ -257,16 +259,19 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
-//Admin: Delete User - api/v1/admin/user/:id
+// Delete User Controller
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     return next(
-      new ErrorHandler(`User not found with this id ${req.params.id}`)
+      new ErrorHandler(`User not found with ID: ${req.params.id}`, 404)
     );
   }
+
   await user.remove();
+
   res.status(200).json({
     success: true,
+    message: "User deleted successfully",
   });
 });

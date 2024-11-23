@@ -45,12 +45,15 @@ const getAllTransactionssinsle = async (req, res) => {
     let totalPurchaseTax = 0;
     let totalSalesAmount = 0;
     let totalSalesTax = 0;
+    let totalIndirectreturnAmount = 0;
+    let totalIndirectreturnTax = 0;
 
     // Additional variables for the new categories
     let totalDirectIncome = 0;
     let totalIndirectIncome = 0;
     let totalDirectExpense = 0;
     let totalIndirectExpense = 0;
+    let totalIndirectExpenseTax = 0;
     let totalSalesReturn = 0;
     let totalPurchaseReturn = 0;
     let totalPurchaseReturnTax = 0; // Variable to hold total purchase return tax
@@ -65,7 +68,7 @@ const getAllTransactionssinsle = async (req, res) => {
     const indirectExpenseGroupIds = new Set();
     const salesReturnGroupIds = new Set();
     const purchaseReturnGroupIds = new Set();
-
+    const indirectPurchaseReturnGroupIds = new Set();
     // Populate group IDs based on ledgers
     ledgers.forEach((ledger) => {
       switch (ledger.group.trim()) {
@@ -95,6 +98,9 @@ const getAllTransactionssinsle = async (req, res) => {
           break;
         case "Purchase Return":
           purchaseReturnGroupIds.add(ledger._id.toString());
+          break;
+        case "Indirect Purchase Return":
+          indirectPurchaseReturnGroupIds.add(ledger._id.toString());
           break;
         default:
           break;
@@ -165,6 +171,9 @@ const getAllTransactionssinsle = async (req, res) => {
         // If you also want to track indirect expenses from purchase vouchers
         if (indirectExpenseGroupIds.has(ledgerId.toString())) {
           totalIndirectExpense += amount || 0; // Add to total indirect expense if needed
+        }
+        if (taxGroupIds.has(ledgerId.toString())) {
+          totalIndirectExpenseTax += amount || 0;
         }
       });
     });
@@ -239,20 +248,29 @@ const getAllTransactionssinsle = async (req, res) => {
     });
     // Process debit notes to calculate total purchase returns and their taxes
     debitNotes.forEach((debitNote) => {
-      const { creditLedgers = [] } = debitNote; // Assuming debit ledgers hold return details
+      const { creditLedgers = [], voucherType } = debitNote; // Assuming debit ledgers hold return details
 
-      // Calculate total purchase return
+      // Loop through each credit ledger in the debit note
       creditLedgers.forEach(({ ledgerId, amount }) => {
         if (purchaseReturnGroupIds.has(ledgerId.toString())) {
           totalPurchaseReturn += amount || 0; // Sum total purchase return
         }
-
-        // Check if ledger ID is part of tax groups
+        if (indirectPurchaseReturnGroupIds.has(ledgerId.toString())) {
+          totalIndirectreturnAmount += amount || 0; // Sum total indirect purchase return
+        }
         if (taxGroupIds.has(ledgerId.toString())) {
-          totalPurchaseReturnTax += amount || 0; // Subtract total sales return tax
+          totalPurchaseReturnTax += amount || 0; // Sum tax amount on the purchase return
+        }
+        if (
+          taxGroupIds.has(ledgerId.toString()) &&
+          voucherType === "Indirect Debit Note"
+        ) {
+          totalIndirectreturnTax += amount || 0; // Sum tax amount on the purchase return only for 'Indirect Debit Note'
         }
       });
     });
+
+    // Check if ledger ID is part of tax groups
 
     // Process credit notes to calculate total sales returns and their taxes
     // Process credit notes to calculate total sales returns and their taxes
@@ -277,7 +295,7 @@ const getAllTransactionssinsle = async (req, res) => {
     });
 
     // Add similar processing for debitNotes, creditNotes, contraVouchers as needed
-
+    console.log("totalIndirectExpenseTax", totalIndirectExpenseTax);
     // Return the calculated values
     return res.status(200).json({
       totalPurchaseAmount,
@@ -288,10 +306,13 @@ const getAllTransactionssinsle = async (req, res) => {
       totalIndirectIncome,
       totalDirectExpense,
       totalIndirectExpense,
+      totalIndirectExpenseTax,
       totalSalesReturn,
       totalPurchaseReturn,
       totalPurchaseReturnTax,
       totalSalesReturnTax,
+      totalIndirectreturnAmount,
+      totalIndirectreturnTax,
     });
   } catch (error) {
     console.error(error);

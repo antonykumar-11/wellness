@@ -1,24 +1,46 @@
 const express = require("express");
 const router = express.Router();
-const receiptController = require("../controllers/recieptVoucher");
+const receiptVoucherController = require("../controllers/recieptVoucher"); // Adjusted the controller import
 const { isAuthenticatedUser } = require("../middlewares/authenticate");
-// Create a new receipt
-router.post("/", isAuthenticatedUser, receiptController.createReceipt);
+
+// Create a new Receipt Voucher
+router.post(
+  "/",
+  isAuthenticatedUser,
+  receiptVoucherController.createReceiptVoucher // Adjusted to use createReceiptVoucher
+);
+
+// Get all Receipt Vouchers
+router.get(
+  "/",
+  isAuthenticatedUser,
+  receiptVoucherController.getAllReceiptVouchers // Adjusted to use getAllReceiptVouchers
+);
+// Get all Receipt Vouchers
 router.get(
   "/check",
   isAuthenticatedUser,
-  receiptController.getAllVoucherNumbers
+  receiptVoucherController.getAllVoucherNumbers // Adjusted to use getAllReceiptVouchers
 );
-// Get all receipts
-router.get("/", isAuthenticatedUser, receiptController.getAllReceipts);
+// Get a single Receipt Voucher by ID
+router.get(
+  "/:id",
+  isAuthenticatedUser,
+  receiptVoucherController.getReceiptVoucherById // Adjusted to use getReceiptVoucherById
+);
 
-// Get a receipt by ID
-router.get("/:id", isAuthenticatedUser, receiptController.getReceiptById);
+// Update a Receipt Voucher by ID
+router.put(
+  "/:id",
+  isAuthenticatedUser,
+  receiptVoucherController.updateReceiptVoucher // Adjusted to use updateReceiptVoucher
+);
 
-// Update a receipt by ID
-router.put("/:id", isAuthenticatedUser, receiptController.updateReceipt);
-
-// Delete a receipt by ID
-router.delete("/:id", isAuthenticatedUser, receiptController.deleteReceipt);
+// Delete a Receipt Voucher by ID
+router.delete(
+  "/:id",
+  isAuthenticatedUser,
+  receiptVoucherController.deleteReceiptVoucher // Adjusted to use deleteReceiptVoucher
+);
 
 module.exports = router;

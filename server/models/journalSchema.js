@@ -1,31 +1,3 @@
-// const mongoose = require("mongoose");
-
-// const JournalVoucherSchema = new mongoose.Schema({
-//   voucherType: { type: String },
-//   voucherNumber: { type: String, required: true },
-//   date: { type: Date, required: true },
-//   debitLedger: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     refPath: "Ledger",
-//     required: true,
-//   },
-
-//   debitLedgerName: { type: String, required: true }, // New field for debit ledger name
-//   debitAmount: { type: Number, required: true },
-//   creditLedger: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     refPath: "Ledger",
-//     required: true,
-//   },
-
-//   creditLedgerName: { type: String, required: true }, // New field for credit ledger name
-//   creditAmount: { type: Number, required: true },
-//   description: { type: String, required: true },
-// });
-
-// const JournalVoucher = mongoose.model("JournalVoucher", JournalVoucherSchema);
-
-// module.exports = JournalVoucher;
 const mongoose = require("mongoose");
 
 const LedgerEntrySchema = new mongoose.Schema({

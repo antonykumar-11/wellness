@@ -18,6 +18,9 @@ const employeeCreateSchema = new Schema({
     type: String,
     required: true, // Ensure name is required
   },
+  userName: {
+    type: String,
+  },
   name: {
     type: String,
     required: true, // Ensure name is required
@@ -62,6 +65,11 @@ const employeeCreateSchema = new Schema({
     enum: ["Present", "Absent", "Overtime"],
   },
   avatar: String, // Profile picture URL
+  ledgerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Ledger", // Reference to Ledger model
+    default: null, // Optional field
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

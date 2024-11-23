@@ -25,8 +25,6 @@ const itemSchema = new Schema({
   amount: { type: Number, required: false },
   stockName: { type: String, required: false },
 
-  stockGroupName: { type: String, required: false },
-
   stockGroup: { type: String, required: false },
 });
 

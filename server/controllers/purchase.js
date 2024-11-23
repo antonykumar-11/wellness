@@ -89,6 +89,59 @@ const getAllVoucherNumber = async (req, res) => {
     res.status(500).json({ message: "Error fetching purchases" }); // More user-friendly error message
   }
 };
+const getAllPurchaseReturn = async (req, res) => {
+  try {
+    // Construct query object
+    const query = {
+      owner: req.user._id, // Retrieve only the purchases of the authenticated user
+    };
+
+    // Log the final query object
+    console.log("Query Object:", query);
+
+    const purchases = await Purchase.find(query, {
+      _id: 1,
+      voucherType: 1,
+      transactionDate: 1,
+      description: 1,
+      voucherNumber: 1,
+      creditPeriod: 1,
+      creditAmount: 1,
+      creditDueDate: 1,
+      purposeOfPayment: 1,
+      authorizedBy: 1,
+      purchasedTo: 1,
+      purchasedBy: 1,
+      owner: 1,
+      debitLedgers: 1,
+      creditLedgers: 1,
+      balanceBillByBill: 1,
+      checkCreditDays: 1,
+      thisPurchase: 1,
+      paidAmount: 1,
+      subTotal: 1,
+      total: 1,
+      taxRate: 1,
+      taxAmount: 1,
+      taxName: 1,
+      items: 1,
+    })
+      .populate("purchasedBy", "companyName") // Populate purchasedBy with only companyName
+      .populate("purchasedTo", "companyName") // Populate purchasedTo with only companyName
+      .populate("authorizedBy", "name") // Populate authorizedBy with only name field
+      .sort({ voucherNumber: 1 })
+      .lean(); // Converts Mongoose documents to plain JavaScript objects
+
+    if (purchases.length > 0) {
+      return res.status(200).json(purchases);
+    } else {
+      return res.status(200).json([]); // Return an empty array if no matches found
+    }
+  } catch (error) {
+    console.error("Error fetching purchases:", error); // Detailed error log
+    res.status(500).json({ message: "Error fetching purchases" }); // More user-friendly error message
+  }
+};
 
 // Function to handle purchases and update inventory
 
@@ -126,7 +179,7 @@ const createPurchase = async (req, res) => {
         stockName,
         quantity,
         stockGroup,
-        stockGroupName,
+
         hsnCode, // New field for HSN Code
         rate,
         taxRate,
@@ -141,7 +194,7 @@ const createPurchase = async (req, res) => {
         {
           $inc: { quantityAvailable: quantity }, // Increment the quantity
           stockGroup, // Set stockGroup
-          stockGroupName, // Set stockGroupName
+          // Set stockGroupName
           rate, // Set rate
           taxRate, // Set taxRate
           taxAmount, // Set taxAmount
@@ -280,4 +333,5 @@ module.exports = {
   deletePurchaseById,
   getAllVoucherNumbers,
   getAllVoucherNumber,
+  getAllPurchaseReturn,
 };

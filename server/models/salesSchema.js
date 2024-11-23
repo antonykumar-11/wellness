@@ -22,8 +22,14 @@ const itemSchema = new Schema({
   quantity: { type: Number, required: false },
   taxRate: { type: String, required: false },
   taxAmount: { type: Number, required: false },
+  actualrate: { type: Number, required: false },
   amount: { type: Number, required: false },
-  // stockName: { type: String, required: false },
+  stockId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Ledger", // Reference to the Ledger model
+    required: true,
+  },
+  stockName: { type: String, required: false },
 
   // stockGroupName: { type: String, required: false },
 
@@ -55,7 +61,7 @@ const SaleSchema = new Schema(
     creditPeriod: { type: Number, required: false },
     creditAmount: { type: Number, required: false },
     creditDueDate: { type: Date, required: false },
-    purposeOfSale: { type: String, required: false },
+    saleInvoiceNumber: { type: String, required: false },
     customerDetails: {
       // Changed from supplierDetails to customerDetails
       name: { type: String, required: false },
@@ -161,6 +167,8 @@ SaleSchema.pre("save", async function (next) {
 
   next();
 });
+// Create a unique index on the owner field only
+SaleSchema.index({ owner: 1 }, { unique: true });
 
 // Create and export the Sale model
 const Sales = mongoose.model("Sales", SaleSchema);

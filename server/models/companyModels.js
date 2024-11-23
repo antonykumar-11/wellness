@@ -5,91 +5,91 @@ const companySchema = new mongoose.Schema(
   {
     companyName: {
       type: String,
-      required: true,
+      required: false,
     },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to User model
     registrationType: {
       type: String,
-      required: true,
+      required: false,
     },
     registrationUnder: {
       type: String,
-      required: true,
+      required: false,
     },
     street: {
       type: String,
-      required: true,
+      required: false,
     },
     MainArea: {
       type: String,
-      required: true,
+      required: false,
     },
     postOffice: {
       type: String,
-      required: true,
+      required: false,
     },
     ZIPCode: {
       type: String,
-      required: true,
+      required: false,
     },
     City: {
       type: String,
-      required: true,
+      required: false,
     },
     State: {
       type: String,
-      required: true,
+      required: false,
     },
     Country: {
       type: String,
-      required: true,
+      required: false,
     },
     companyMobile: {
       type: String,
-      required: true,
+      required: false,
     },
     companyEmail: {
       type: String,
-      required: true,
+      required: false,
     },
     gstNumber: {
       type: String,
-      required: true,
+      required: false,
     },
     companyPanNumber: {
       type: String,
-      required: true,
+      required: false,
     },
     companyAdarNumber: {
       type: String,
     },
     bankName: {
       type: String,
-      required: true,
+      required: false,
     },
     branch: {
       type: String,
-      required: true,
+      required: false,
     },
     accountNumber: {
       type: String,
-      required: true,
+      required: false,
     },
     ifscCode: {
       type: String,
-      required: true,
+      required: false,
     },
     authorizedByName: {
       type: String,
-      required: true,
+      required: false,
     },
     authorizedByDesignation: {
       type: String,
-      required: true,
+      required: false,
     },
     authorizedBySignature: {
       type: String,
-      required: true,
+      required: false,
     },
     tanNumber: {
       type: String,
@@ -103,7 +103,7 @@ const companySchema = new mongoose.Schema(
   },
 
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: false, // Adds createdAt and updatedAt fields
   }
 );
 
