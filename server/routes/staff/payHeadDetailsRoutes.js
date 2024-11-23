@@ -4,7 +4,7 @@ const payHeadDetailsController = require("../../controllers/StaffController/payH
 
 const { isAuthenticatedUser } = require("../../middlewares/authenticate");
 router.post(
-  "/",
+  "/:employeeId",
   isAuthenticatedUser,
   payHeadDetailsController.createPayHeadDetails
 );

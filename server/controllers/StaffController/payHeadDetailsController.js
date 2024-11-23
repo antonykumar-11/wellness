@@ -137,16 +137,49 @@ exports.getPayHeadDetailsById = async (req, res) => {
 // };
 
 // Delete PayHeadDetails by employeeId
+// exports.createPayHeadDetails = async (req, res) => {
+//   try {
+//     const { employeeId } = req.params; // Extract employeeId from URL params
+//     const { startDate, endDate } = req.query; // Extract startDate and endDate from query parameters
 
+//     // Check if employeeId is provided
+//     if (!employeeId) {
+//       return res.status(400).json({ message: "Employee ID is required." });
+//     }
+
+//     // Parse and validate dates
+//     const start = new Date(startDate);
+//     const end = new Date(endDate);
+//     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+//       return res.status(400).json({ message: "Invalid start or end date." });
+//     }
+
+//     // Query database for matching PayHeadDetails
+//     const payHeadDetails = await PayHeadDetails.find({
+//       employeeId,
+//       date: { $gte: start, $lte: end },
+//     });
+
+//     // Respond with filtered PayHeadDetails
+//     res.status(200).json(payHeadDetails);
+//   } catch (error) {
+//     console.error("Error fetching PayHeadDetails:", error);
+//     res.status(500).json({
+//       message: `Failed to fetch PayHeadDetails: ${error.message}`,
+//     });
+//   }
+// };
 exports.createPayHeadDetails = async (req, res) => {
   console.log("req.user", req.user);
-  try {
-    const { date, details, employeeId } = req.body;
 
-    // Validate required fields
+  const { date, details } = req.body;
+  const { employeeId } = req.params;
+
+  try {
     if (!employeeId) {
       return res.status(400).json({ message: "Employee ID is required." });
     }
+
     if (!details || !details.length) {
       return res.status(400).json({ message: "Details are required." });
     }

@@ -52,9 +52,9 @@ export const payHeadDetailsApi = createApi({
 
     createPayHeadDetails: builder.mutation({
       query: ({ employeeId, newPayHeadDetails }) => ({
-        url: `payHeadDetails/${employeeId}`,
+        url: `payHeadDetails/${employeeId}`, // Employee ID is already part of the URL
         method: "POST",
-        body: newPayHeadDetails,
+        body: newPayHeadDetails, // Only include the necessary payload here
       }),
     }),
 

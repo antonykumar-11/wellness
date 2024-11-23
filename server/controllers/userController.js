@@ -172,15 +172,25 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
-//Update Profile - /api/v1/update
+// Update Profile - /api/v1/update
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   let newUserData = {
     name: req.body.name,
     email: req.body.email,
-    companyName: req.body.companyName,
-    address: req.body.address,
+    companyName: req.body.companyName, // Ensures companyName is a string
+    invoiceType: req.body.invoiceType,
+    address1: req.body.address1,
+    address2: req.body.address2,
+    address3: req.body.address3,
+    address4: req.body.address4,
     gstNumber: req.body.gstNumber,
     mobileNumber: req.body.mobileNumber,
+    bankName: req.body.bankName,
+    accountNumber: req.body.accountNumber,
+    description: req.body.description,
+    ifsc: req.body.ifsc,
+    branch: req.body.branch,
+    pancardnumber: req.body.pancardnumber,
   };
 
   let avatar;

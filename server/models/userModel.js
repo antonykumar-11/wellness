@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
@@ -26,27 +26,50 @@ const userSchema = new mongoose.Schema({
   },
   companyName: {
     type: String,
-    required: false,
-    unique: false,
-  },
-  address: {
-    type: String,
-    required: false,
-    unique: false,
-  },
-  role: {
-    type: String,
-    default: "user",
   },
   mobileNumber: {
     type: String,
     required: false,
     unique: false,
   },
+  invoiceType: {
+    type: String,
+  },
+  address1: {
+    type: String,
+  },
+  address2: {
+    type: String,
+  },
+  address3: {
+    type: String,
+  },
+  address4: {
+    type: String,
+  },
   gstNumber: {
     type: String,
-    required: false,
-    unique: false,
+  },
+  role: {
+    type: String,
+  },
+  bankName: {
+    type: String,
+  },
+  accountNumber: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  ifsc: {
+    type: String,
+  },
+  branch: {
+    type: String,
+  },
+  pancardnumber: {
+    type: String,
   },
   resetPasswordToken: String,
   resetPasswordTokenExpire: Date,
@@ -87,4 +110,5 @@ userSchema.methods.getResetToken = function () {
 };
 
 const User = mongoose.model("User", userSchema);
+
 module.exports = User;

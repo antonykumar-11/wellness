@@ -131,7 +131,7 @@ exports.getAllLedgersall = async (req, res) => {
 
 exports.getAllLedgersallPurchase = async (req, res) => {
   try {
-    const stockName = "ithuPurchase"; // Specify the StockName you want to filter by
+    const stockName = "ithuStock"; // Specify the StockName you want to filter by
     const ledgers = await Ledger.find({
       owner: req.user.id,
       StockName: stockName, // Filter by StockName

@@ -408,7 +408,7 @@ const AllEmployeeSalaryCalculator = () => {
             (sum, value) => sum + value,
             0
           );
-
+          console.log("usersListUser", usersListUser);
           return (
             <div
               key={index}
@@ -417,11 +417,9 @@ const AllEmployeeSalaryCalculator = () => {
               <h2 className="text-center text-xl font-bold">
                 {usersListUser?.user?.companyName}
               </h2>
-              <p className="text-center">{usersListUser?.user?.address}</p>
-              <p className="text-center">
-                Gst Number : {""}
-                {usersListUser.user.gstNumber}
-              </p>
+              <p className="text-center">{usersListUser?.user?.address1}</p>
+              <p className="text-center">{usersListUser?.user?.address2}</p>
+
               <p className="text-center">
                 Mobile Number : {""}
                 {usersListUser.user.mobileNumber}
@@ -473,15 +471,6 @@ const AllEmployeeSalaryCalculator = () => {
                     <p>
                       <span className="font-bold">Mobile:</span>{" "}
                       {employee.contact?.phone || "-"}
-                    </p>
-                    <p>
-                      <span className="font-bold">
-                        Father's/Husband's Name:
-                      </span>{" "}
-                      -
-                    </p>
-                    <p>
-                      <span className="font-bold">Casual Leave:</span> -
                     </p>
                   </div>
                 </div>
