@@ -1269,8 +1269,8 @@ const SalesVoucher = () => {
               />
               {isDropdownOpen[index] && (
                 <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto  whitespace-nowrap  dark:bg-gray-800 dark:text-white">
-                  {filteredStockData(searchTerms[index] || "").length > 0 ? (
-                    filteredStockData(searchTerms[index] || []).map(
+                  {filteredLedgerData(searchTerms[index] || "").length > 0 ? (
+                    filteredLedgerData(searchTerms[index] || []).map(
                       (option) => (
                         <li
                           key={option._id}
