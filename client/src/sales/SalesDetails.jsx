@@ -707,12 +707,7 @@ const SalesVoucher = () => {
       [field]: !prevState[field],
     }));
   };
-  const filteredData = filteredStockData(searchTermStock); // Filtered data based on search term
-  const [isTrue, setIsTrue] = useState(false);
 
-  const handleClick = () => {
-    setIsTrue(!isTrue); // Toggle between true and false
-  };
   return (
     <div className="p-2">
       {/* form field  */}
@@ -1269,8 +1264,8 @@ const SalesVoucher = () => {
               />
               {isDropdownOpen[index] && (
                 <ul className="absolute z-10 bg-white border border-gray-300 rounded shadow-md w-full max-h-40 overflow-auto  whitespace-nowrap  dark:bg-gray-800 dark:text-white">
-                  {filteredLedgerData(searchTerms[index] || "").length > 0 ? (
-                    filteredLedgerData(searchTerms[index] || []).map(
+                  {filteredStockData(searchTerms[index] || "").length > 0 ? (
+                    filteredStockData(searchTerms[index] || []).map(
                       (option) => (
                         <li
                           key={option._id}
