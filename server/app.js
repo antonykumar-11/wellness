@@ -9,16 +9,10 @@ const connectDatabase = require("./config/database");
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
-const allowedOrigins = [
-  "https://www.vedawellness.life", // Ensure this is correct
-  "http://localhost:8000",
-  "https://wellness-eight.vercel.app",
-  "https://wellness-csxhciu9b-antonykumar-11s-projects.vercel.app",
-  "http://localhost:5173", // For local development
-  process.env.FRONTEND_URL, // Should resolve to https://wellness-9.onrender.com
-];
-
-console.log("Frontend URL from .env:", process.env.FRONTEND_URL);
+const allowedOrigins =
+  process.env.NODE_ENV === "production"
+    ? ["https://vedawellness.life", "https://wellness-9.onrender.com"]
+    : ["http://localhost:8000", "http://localhost:5173"];
 
 const corsOptions = {
   origin: (origin, callback) => {
