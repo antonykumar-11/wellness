@@ -707,12 +707,7 @@ const SalesVoucher = () => {
       [field]: !prevState[field],
     }));
   };
-  const filteredData = filteredStockData(searchTermStock); // Filtered data based on search term
-  const [isTrue, setIsTrue] = useState(false);
 
-  const handleClick = () => {
-    setIsTrue(!isTrue); // Toggle between true and false
-  };
   return (
     <div className="p-2">
       {/* form field  */}
