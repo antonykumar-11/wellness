@@ -10,10 +10,10 @@ dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 const corsOptions = {
   origin: [
-    "https://johnson-dc80.onrender.com",
+    "https://wellness-9.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://www.alphacranesalpha.in",
+    "https://www.vedawellness.life",
     process.env.FRONTEND_URL,
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
