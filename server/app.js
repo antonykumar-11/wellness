@@ -13,6 +13,7 @@ const corsOptions = {
     "https://wellness-slia.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
+    "http://localhost:8000",
     "https://www.vedawellness.life",
     process.env.FRONTEND_URL,
   ],
