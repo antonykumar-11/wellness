@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 const corsOptions = {
   origin: [
-    "https://wellness-9.onrender.com",
+    "https://wellness-slia.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
     "https://www.vedawellness.life",
