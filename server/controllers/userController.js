@@ -211,10 +211,7 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
     runValidators: true,
   });
 
-  res.status(200).json({
-    success: true,
-    user,
-  });
+  sendToken(user, 201, res);
 });
 
 //Admin: Get All Users - /api/v1/admin/users

@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   useGetSingleUserQuery,
   usePatchUserMutation,
   useDeleteUserMutation,
 } from "../store/api/userapi";
-
+import AuthContext from "../auth/AuthContext";
 const Profile = () => {
   const { id } = useParams(); // Get user ID from URL params
+  const { login: setAuthTrue } = useContext(AuthContext);
   const [userData, setUserData] = useState({
     name: "",
     email: "",
     password: "",
-    avatar: "",
+
     companyName: "",
     mobileNumber: "",
     invoiceType: "",
@@ -29,8 +30,9 @@ const Profile = () => {
     branch: "",
     pancardnumber: "",
   });
-  console.log("userData", userData);
+
   const [avatar, setAvatar] = useState("");
+  console.log("userData", avatar);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -84,16 +86,12 @@ const Profile = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    // Log form data to ensure it's correct
-    console.log("Form data to submit:", userData);
-
-    e.preventDefault();
-
+    // Prepare the form data
     const formData = new FormData();
     formData.append("name", userData.name);
     formData.append("email", userData.email);
     formData.append("password", userData.password);
-    formData.append("avatar", userData.avatar);
+    formData.append("avatar", avatar);
     formData.append("companyName", userData.companyName);
     formData.append("mobileNumber", userData.mobileNumber);
     formData.append("gstNumber", userData.gstNumber);
@@ -111,22 +109,41 @@ const Profile = () => {
 
     try {
       if (id) {
-        await patchUser({ id, data: formData }).unwrap();
+        const response = await patchUser({ id, data: formData }).unwrap();
+        console.log("Response:", response);
+
+        // Update auth context and localStorage after successful update
+        setAuthTrue({ ...response.user, token: response.token }); // Store user info and token
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        // Reset form and state after submission
+        setUserData({
+          name: "",
+          email: "",
+          password: "",
+          avatar: "",
+          companyName: "",
+          address1: "",
+          address2: "",
+          address3: "",
+          address4: "",
+          gstNumber: "",
+          mobileNumber: "",
+          invoiceType: "",
+          bankName: "",
+          accountNumber: "",
+          ifsc: "",
+          branch: "",
+          pancardnumber: "",
+        });
+        setAvatar(null);
+        setAvatarPreview(null);
+        setError("");
+        navigate("/admin"); // Navigate to admin page after update
       }
-      // Reset form after submission
-      setUserData({
-        name: "",
-        email: "",
-        password: "",
-        avatar: "",
-        companyName: "",
-        address: "",
-      });
-      setAvatar(null);
-      setAvatarPreview(null);
-      setError("");
-      navigate("/admin");
     } catch (error) {
+      console.error("Error updating user:", error);
       setError("Operation failed. Please try again later.");
     }
   };

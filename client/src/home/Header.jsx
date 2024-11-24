@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu as MenuIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import useTheme from "../context/Theme"; // Assuming you're using a ThemeContext
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,9 +10,9 @@ import CalculatorModal from "../admin/CalCulatorModal";
 const Header = ({ toggleSidebar }) => {
   const { themeMode, darkTheme, lightTheme } = useTheme();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth(); // Assuming you're using an AuthContext
+  const { isAuthenticated, user, updateUserAvatar } = useAuth(); // Assuming you have a function to update user info
   const [isModalOpen, setModalOpen] = useState(false);
-
+  console.log("user", user);
   // Handle theme toggle
   const handleToggle = () => {
     if (themeMode === "light") {
@@ -27,14 +27,20 @@ const Header = ({ toggleSidebar }) => {
     navigate(`/reports/profile/${user._id}`); // Include user ID in the URL
   };
 
-  // Navigate to home page
-  const handleHomeClick = () => {
-    navigate("/"); // Redirect to the home page
+  // Handle profile picture update
+  const handleProfilePicUpdate = (newAvatarUrl) => {
+    // Assuming updateUserAvatar is a function that updates the user profile
+    updateUserAvatar(newAvatarUrl);
   };
+
+  useEffect(() => {
+    // You can also use useEffect to re-fetch the user data if it's stored externally
+    // This would be triggered when the avatar is updated (if you use something like Context or Redux)
+  }, [user?.avatar]); // Run when the avatar changes
 
   return (
     <header
-      className={`h-20 flex items-center justify-between border-b p-4 ${
+      className={`h-20 right flex items-center justify-between border-b p-4 ${
         themeMode === "dark"
           ? "bg-gray-800 border-gray-700"
           : "bg-yellow-500 border-slate-200"
@@ -74,13 +80,17 @@ const Header = ({ toggleSidebar }) => {
           )}
         </button>
       </div>
-      {/* Home Redirect Button */}
+
       <button
-        onClick={handleHomeClick}
-        className="bg-blue-500 text-white px-6 py-3 rounded ml-4"
+        onClick={() => setModalOpen(true)}
+        className="bg-green-500 text-white px-6 py-3 rounded"
       >
-        Go Home
+        <FontAwesomeIcon icon={faCalculator} className="mr-2" />
       </button>
+      <CalculatorModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+      />
       {/* Sidebar toggle button for small screens */}
       <button
         className="md:hidden p-2"
