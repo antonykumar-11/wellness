@@ -15,7 +15,7 @@ const InvoiceContainer = () => {
   const invoiceList = invoicesResponse?.data?.invoices || [];
   const salesList = invoicesResponse?.data?.sales || [];
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-
+  console.log("selectedInvoice", selectedInvoice);
   useEffect(() => {
     if (selectedInvoice) {
       refetch();

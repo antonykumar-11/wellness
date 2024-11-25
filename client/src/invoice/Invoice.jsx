@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import InvoicePDF from "./InvoicePdf"; // Import your InvoicePDF component
+import InvoicePDF from "./InvoicePdf";
 import { useNavigate } from "react-router-dom";
 import { useDeleteInvoiceMutation } from "../store/api/InvoicesApi"; // Adjust the path as needed
 import convertNumberToWords from "./convertNumberToWords";
@@ -9,6 +9,7 @@ import { useGetAllInvoicesQuery } from "../store/api/InvoicesApi";
 const Invoice = ({ data }) => {
   const componentRef = useRef();
   const { data: invoicesResponse, isLoading } = useGetAllInvoicesQuery();
+  console.log("invoicesResponse", invoicesResponse);
   const invoiceList = invoicesResponse?.data?.invoices || [];
   const calculateTotal = (itemGroups) => {
     let totalSubtotal = 0;
@@ -49,77 +50,85 @@ const Invoice = ({ data }) => {
       // Optionally handle the error, e.g., show a message to the user
     }
   };
-
+  console.log("invoiceList", invoiceList.companyName);
   return (
     <div className="p-6">
       <div
         ref={componentRef}
         className="max-w-4xl mx-auto bg-white p-10 shadow-md rounded-lg"
       >
-        {invoiceList.length > 0 ? (
-          invoiceList.map((invoice, index) => (
-            <div key={index}>
-              {/* Invoice Header */}
-              <div className="relative mb-8 flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-gray-800 uppercase">
-                    {invoice.companyName || "Company Name"}
-                  </h1>
-                  <p className="text-lg text-gray-600">
-                    {invoice.companyTagline || "Company Tagline"}
-                  </p>
+        {invoiceList &&
+        (Array.isArray(invoiceList)
+          ? invoiceList.length
+          : Object.keys(invoiceList).length) ? (
+          (Array.isArray(invoiceList) ? invoiceList : [invoiceList]).map(
+            (invoice, index) => (
+              <div key={index}>
+                {/* Invoice Header */}
+                <div className="relative mb-8 flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-2xl font-bold text-gray-800 uppercase">
+                      {invoice.companyName}
+                    </h1>
+                  </div>
+                  <img
+                    src={invoice.avatar}
+                    alt="Company Logo"
+                    className="absolute right-12 top-6 transform -translate-y-1/2 w-28 h-28  rounded-full  "
+                    style={{ marginTop: "4rem" }}
+                  />
                 </div>
-                <img
-                  src={invoice.logo || Image}
-                  alt="Company Logo"
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 w-32 h-32 rounded-full object-contain"
-                  style={{ marginRight: "-4rem" }}
-                />
-              </div>
 
-              {/* Company and Invoice Details */}
-              <div className="text-right mb-10">
-                <>
-                  <p className="text-base text-gray-600">{invoice.address1}</p>
-                  <p className="text-base text-gray-600">{invoice.address2}</p>
-                  <p className="text-base text-gray-600">{invoice.address3}</p>
-                  <p className="text-base text-gray-600">{invoice.address4}</p>
-                  <p className="text-base text-gray-600">
-                    Email : {invoice.email}
-                  </p>
-                  <p className="text-base text-gray-600">
-                    GST No : {invoice.gstNumber}
-                  </p>
-                  <p className="text-base text-gray-600">
-                    GST No : {invoice.mobileNumber}
-                  </p>
-                </>
-              </div>
-
-              <h2 className="text-center mb-8 text-2xl font-semibold">
-                Tax Invoice
-              </h2>
-
-              <div className="flex justify-between mb-10">
-                <div>
-                  <p className="text-base text-gray-600">
-                    PAN NO: {invoice.panNo || "N/A"}
-                  </p>
-                  <p className="text-base text-gray-600">
-                    GST NO: {invoice.gstNo || "N/A"}
-                  </p>
+                {/* Company and Invoice Details */}
+                <div className="text-left mb-4">
+                  <>
+                    <p className="text-sm text-gray-600">{invoice.address1}</p>
+                    <p className="text-sm text-gray-600">{invoice.address2}</p>
+                    <p className="text-sm text-gray-600">{invoice.address3}</p>
+                    <p className="text-sm text-gray-600">{invoice.address4}</p>
+                    <p className="text-sm text-gray-600">
+                      Email : {invoice.email}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      GST No : {invoice.gstNumber}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Mobile No : {invoice.mobileNumber}
+                    </p>
+                  </>
                 </div>
-                <div>
-                  <p className="text-base text-gray-600">
-                    INVOICE NO: {invoice.invoiceNo || "N/A"}
-                  </p>
-                  <p className="text-base text-gray-600">
-                    DATE: {invoice.date || "N/A"}
-                  </p>
+
+                <h2 className="text-center  text-xl font-semibold">
+                  Tax Invoice
+                </h2>
+
+                <div className="flex justify-between mb-10">
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      PAN NO: {invoice.pancardnumber || "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      GST NO: {invoice.gstNumber || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      INVOICE NO: {data.saleInvoiceNumber || "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      DATE:{" "}
+                      {data.transactionDate
+                        ? new Date(data.transactionDate).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )
+                        : "N/A"}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            )
+          )
         ) : (
           <p className="text-gray-600">No invoices available.</p>
         )}
@@ -131,7 +140,7 @@ const Invoice = ({ data }) => {
               <h2 className="text-lg font-semibold text-gray-600">
                 Billed To:
               </h2>
-              <div className="text-base text-gray-600">
+              <div className="text-sm text-gray-600">
                 <p>{data.purchasedBy.companyName}</p>
                 <p>{data.purchasedBy.street}</p>
                 <p>{data.purchasedBy.MainArea}</p>
@@ -148,7 +157,7 @@ const Invoice = ({ data }) => {
               <h2 className="text-lg font-semibold text-gray-600">
                 Shipped To:
               </h2>
-              <div className="text-base text-gray-600">
+              <div className="text-sm text-gray-600">
                 <p>{data.purchasedTo.companyName}</p>
                 <p>{data.purchasedTo.street}</p>
                 <p>{data.purchasedTo.MainArea}</p>
@@ -217,55 +226,59 @@ const Invoice = ({ data }) => {
         </div>
 
         {/* Total and Amount in Words */}
-        <div className="flex justify-end mb-10">
+        <div className="flex justify-end mb-2">
           <div className="text-right">
-            <p className="text-base text-gray-600 mb-1">
+            <p className="text-sm text-gray-600 mb-1">
               Subtotal: ₹{totalSubtotal.toFixed(2)}
             </p>
-            <p className="text-base text-gray-600 mb-1">
+            <p className="text-sm text-gray-600 mb-1">
               Add CGST {taxRate / 2}: ₹{totalCGST.toFixed(2)}
             </p>
-            <p className="text-base text-gray-600 mb-1">
+            <p className="text-sm text-gray-600 mb-1">
               Add SGST {taxRate / 2}: ₹{totalSGST.toFixed(2)}
             </p>
-            <p className="text-2xl font-bold text-gray-800 mt-2">
+            <p className="text-xl font-bold text-gray-800 mt-2">
               Total: ₹{overallTotal.toFixed(2)}
             </p>
           </div>
         </div>
-        <div className="mb-10">
+        <div className="">
           <p className="text-base text-gray-600">
             Amount in Words: {convertNumberToWords(overallTotal)}
           </p>
         </div>
 
         {/* Bank Details and Declaration */}
-        {invoiceList.length > 0 ? (
-          invoiceList.map((invoice, index) => (
-            <div key={index} className="mb-10">
-              <h2 className="text-lg font-semibold text-gray-600 mb-2">
-                Bank Details:
-              </h2>
-              <p className="text-base text-gray-600">
-                Account name: {invoice.bankName || "N/A"}
-              </p>
-              <p className="text-base text-gray-600">
-                Account Number: {invoice.accountNumber || "N/A"}
-              </p>
-              <p className="text-base text-gray-600">
-                IFSC Code: {invoice.ifsc || "N/A"}
-              </p>
-              <p className="text-base text-gray-600">
-                Branch: {invoice.branch || "N/A"}
-              </p>
-
-              <div className="mt-4">
-                <p className="text-base text-gray-600 text-[16px]">
-                  {invoice.description || "No description provided."}
+        {invoiceList &&
+        (Array.isArray(invoiceList)
+          ? invoiceList.length
+          : Object.keys(invoiceList).length) ? (
+          (Array.isArray(invoiceList) ? invoiceList : [invoiceList]).map(
+            (invoice, index) => (
+              <div key={index} className="mb-10">
+                <h2 className="text-lg font-semibold text-gray-600 mb-2">
+                  Bank Details:
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Account name: {invoice.bankName || "N/A"}
                 </p>
-              </div>
+                <p className="text-sm text-gray-600">
+                  Account Number: {invoice.accountNumber || "N/A"}
+                </p>
+                <p className="text-sm text-gray-600">
+                  IFSC Code: {invoice.ifsc || "N/A"}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Branch: {invoice.branch || "N/A"}
+                </p>
 
-              <div className="mt-10 text-right">
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 text-[16px]">
+                    {invoice.description || "No description provided."}
+                  </p>
+                </div>
+                {/* 
+              <div className="mt-2 text-right">
                 <p className="text-lg font-semibold text-gray-600">
                   For {invoice.companyName || "Company Name"}
                 </p>
@@ -273,9 +286,10 @@ const Invoice = ({ data }) => {
                   {invoice.director || "Director"}
                 </p>
                 <p className="text-base text-gray-600">Managing Director</p>
+              </div> */}
               </div>
-            </div>
-          ))
+            )
+          )
         ) : (
           <p className="text-gray-600">No invoices available.</p>
         )}

@@ -42,10 +42,9 @@ exports.createInvoice = async (req, res) => {
 // };
 
 exports.getAllInvoices = async (req, res) => {
-  console.log("uuuuuuuuuuuuuuuuuuu", req.user);
   try {
-    // Fetch invoices where the owner matches the logged-in user's ID
-    const invoices = await User.find().select({
+    // Fetch user data for the logged-in user
+    const invoices = await User.findById(req.user._id).select({
       avatar: 1,
       companyName: 1,
       invoiceType: 1,

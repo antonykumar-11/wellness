@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
     borderRadius: "50%", // Use 50% for a perfect circle
     position: "absolute", // Keep it positioned as desired
     right: 0, // Align to the right side
+    bottom: 0.5,
   },
 
   invoiceTaxTitle: {
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   tableCellDescriptionHeader: {
     flex: 2,
     padding: 8,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "red",
     borderRightWidth: 1,
     borderRightColor: "#D1D5DB",
     fontSize: 10,
@@ -295,7 +296,7 @@ const InvoicePDF = ({ data, invoiceList }) => {
     invoiceType,
     mobileNumber,
     pancardnumber,
-  } = invoiceList[0];
+  } = invoiceList;
   console.log("invoiceList", invoiceList);
   console.log("data", data);
   // Format the date to a more readable format
@@ -304,31 +305,62 @@ const InvoicePDF = ({ data, invoiceList }) => {
     month: "short",
     year: "numeric",
   });
+
   const calculateTotal = (itemGroups) => {
     let totalSubtotal = 0;
     let totalCGST = 0;
     let totalSGST = 0;
-    const taxRate = itemGroups[0]?.[0]?.taxRate || 0;
+    let taxRate = 0; // Initialize tax rate
 
-    itemGroups.forEach((items) => {
-      const subtotal = items.reduce(
-        (acc, item) => acc + Number(item.rate) * (item.quantity || 1),
+    itemGroups.forEach((group, index) => {
+      console.log("Processing Group:", group);
+
+      if (!Array.isArray(group)) {
+        console.error("Invalid group structure:", group);
+        return;
+      }
+
+      if (index === 0 && group.length > 0) {
+        // Extract tax rate from the first item in the first group
+        taxRate = group[0]?.taxRate ? Number(group[0].taxRate) : 0;
+        console.log("Tax Rate:", taxRate);
+      }
+
+      // Calculate subtotal
+      const subtotal = group.reduce(
+        (acc, item) => acc + Number(item.rate || 0) * (item.quantity || 1),
         0
       );
+      console.log("Subtotal for Group:", subtotal);
+
+      // Calculate CGST and SGST
       const cgst = (subtotal * (taxRate / 2)) / 100;
       const sgst = (subtotal * (taxRate / 2)) / 100;
 
+      console.log("CGST:", cgst, "SGST:", sgst);
+
+      // Accumulate totals
       totalSubtotal += subtotal;
       totalCGST += cgst;
       totalSGST += sgst;
     });
 
     const overallTotal = totalSubtotal + totalCGST + totalSGST;
+
+    console.log("Final Totals:", {
+      totalSubtotal,
+      totalCGST,
+      totalSGST,
+      overallTotal,
+      taxRate,
+    });
+
     return { totalSubtotal, totalCGST, totalSGST, overallTotal, taxRate };
   };
+
   const { totalSubtotal, totalCGST, totalSGST, overallTotal, taxRate } =
     calculateTotal([data.items]);
-
+  console.log(" totalSubtota", totalSubtotal);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -457,7 +489,7 @@ const InvoicePDF = ({ data, invoiceList }) => {
           </View>
 
           {/* Invoice Items */}
-          <View style={styles.tableContainer}>
+          <View style={[styles.tableContainer, styles.borderLeft]}>
             {/* Header Row */}
             <View style={[styles.tableRow, styles.headerRow]}>
               <Text style={styles.tableCellHeader}>Sl No.</Text>
@@ -544,6 +576,7 @@ const InvoicePDF = ({ data, invoiceList }) => {
             </View>
           </View>
           {/* Total Row */}
+          {/* Total Row */}
           <View style={[styles.tableRow, styles.summaryRow]}>
             <View style={styles.leftEmptySpace} />
             <View style={[styles.rightContent, styles.borderRightOnly]}>
@@ -557,7 +590,8 @@ const InvoicePDF = ({ data, invoiceList }) => {
                   styles.summaryCellValue,
                 ]}
               >
-                {overallTotal}
+                {Number(overallTotal).toFixed(2)}{" "}
+                {/* Format to two decimal places */}
               </Text>
             </View>
           </View>
