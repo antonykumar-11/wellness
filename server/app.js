@@ -79,6 +79,7 @@ const transactionRoutes = require("./routes/antony");
 const purchaseVoucherRoute = require("./routes/servicePurchaseRoutes");
 const salesVoucher = require("./routes/salesService");
 const assets = require("./routes/antony3");
+const customerRoutes = require("./routes/Customer");
 // Registering routes
 app.use("/api/v1/auth", User);
 app.use("/api/v1/payments", paymentRoutes);
@@ -121,7 +122,7 @@ app.use("/api/v1/transections", require("./routes/transactionRoutes"));
 app.use("/api/v1/transection", require("./routes/transectionRoute")); // personal app
 app.use("/api/v1/vehicle-rent", require("./routes/vehicleRent")); // personal app
 app.use("/api/v1/profits", require("./routes/monthProfit")); // personal app
-
+app.use("/api/v1/customers", customerRoutes); // personal app
 // Serve static files in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
